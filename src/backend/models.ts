@@ -52,6 +52,10 @@ export interface Stats {
   /** Wiederholungen heute */
   reviewsToday: number;
   reviewsDay: string;
+  /** XP der laufenden Woche */
+  weekXp: number;
+  /** Montag der laufenden Woche (ISO-Tag) */
+  weekStart: string;
 }
 
 export const EMPTY_STATS: Stats = {
@@ -61,6 +65,32 @@ export const EMPTY_STATS: Stats = {
   lastDay: null,
   reviewsToday: 0,
   reviewsDay: "",
+  weekXp: 0,
+  weekStart: "",
+};
+
+/**
+ * Zentraler Lernfortschritt — die einzige Quelle für „Wo stehe ich?“.
+ * Ersetzt verstreute localStorage-Schlüssel (Tagesplan, Ḥifẓ, Lektionen …).
+ */
+export interface ProgressState {
+  /** Abgeschlossene Lektionen je Fach: Fach-Id → Lektions-Ids */
+  lessons: Record<string, string[]>;
+  /** Tagesplan: Datum + Erledigt-Flags */
+  planDay: string;
+  plan: boolean[];
+  /** Ḥifẓ-Status je Sūra: aufgedeckte Wörter */
+  hifz: Record<string, boolean[]>;
+  /** Zuletzt aktiv besuchtes Fach (für „Weiterlernen“) */
+  lastSubject: string | null;
+}
+
+export const EMPTY_PROGRESS: ProgressState = {
+  lessons: {},
+  planDay: "",
+  plan: [],
+  hifz: {},
+  lastSubject: null,
 };
 
 /** Definition einer Lernkarte (Inhalt, kein Zustand). */

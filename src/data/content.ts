@@ -732,15 +732,107 @@ export const orderSteps = [
   { n: 6, title: "Iḥsān & Lehrer", desc: "Verinnerlichung bei einem lebenden Gelehrten — Wissen wird Haltung." },
 ];
 
-/* ---------- Dashboard ---------- */
-export type Track = { id: string; name: string; sub: string; pct: number; icon: string; color: string };
-export const tracks: Track[] = [
-  { id: "arabic", name: "Arabisch Fuṣḥā", sub: "A1 → A2 · Wurzelprinzip & Naḥw-Basics", pct: 42, icon: "qalam", color: "#D8B25C" },
-  { id: "quran", name: "Quran & Taǧwīd", sub: "Ǧuzʾ ʿAmma · 7 Taǧwīd-Regeln aktiv", pct: 68, icon: "book", color: "#4FC1A6" },
-  { id: "fiqh", name: "Fiqh · ḥanafitisch", sub: "Ṭahāra: Wuḍūʾ, Ġusl, Tayammum", pct: 25, icon: "scale", color: "#6E93D6" },
-  { id: "hadith", name: "Ḥadīṯ & Uṣūl al-Ḥadīṯ", sub: "al-Arbaʿīn an-Nawawiyya · Ḥadīṯ 1–14", pct: 31, icon: "scroll", color: "#D08770" },
-  { id: "science", name: "Islamische Wissenschaften", sub: "Karte des Wissens · ʿAqīda zuerst", pct: 12, icon: "tree", color: "#C9A3DE" },
+/* ---------- Fächer & Lektionen (Fortschritt wird aus echtem Verhalten berechnet) ---------- */
+export type SubjectId = "quran" | "arabisch" | "fiqh" | "hadith" | "wissenschaft";
+
+export interface Lesson {
+  id: string;
+  title: string;
+}
+
+export interface Subject {
+  id: SubjectId;
+  name: string;
+  ar: string;
+  desc: string;
+  icon: string;
+  color: string;
+  route: string;
+  /** verknüpfte Quiz-Kategorie im Training (optional) */
+  training?: string;
+  lessons: Lesson[];
+}
+
+export const SUBJECTS: Subject[] = [
+  {
+    id: "quran",
+    name: "Quran & Taǧwīd",
+    ar: "القُرْآن",
+    desc: "Lesen, hören, Regeln der Rezitation",
+    icon: "book",
+    color: "#4FC1A6",
+    route: "/lernen/quran",
+    training: "tajweed",
+    lessons: [
+      { id: "lesung", title: "Eine Sūra im Muṣḥaf lesen" },
+      { id: "wort", title: "Die Fātiḥa Wort für Wort studieren" },
+      { id: "tajweed-regeln", title: "Alle 7 Regeln der Taǧwīd-Werkstatt" },
+      { id: "hifz-ikhlas", title: "Sūrat al-Iḫlāṣ im Ḥifẓ-Trainer üben" },
+    ],
+  },
+  {
+    id: "arabisch",
+    name: "Arabisch Fuṣḥā",
+    ar: "العَرَبِيَّة",
+    desc: "Alphabet, Wurzeln und Formenlehre",
+    icon: "qalam",
+    color: "#D8B25C",
+    route: "/lernen/arabisch",
+    training: "grammar",
+    lessons: [
+      { id: "alphabet", title: "Mindestens 10 Buchstaben erkunden" },
+      { id: "wurzeln", title: "Alle 4 Wurzelfamilien erkunden" },
+      { id: "konjugation", title: "al-Māḍī und al-Muḍāriʿ ansehen" },
+      { id: "vokabeln", title: "5 Karteikarten im Training meistern" },
+    ],
+  },
+  {
+    id: "fiqh",
+    name: "Fiqh & Uṣūl",
+    ar: "الفِقْه",
+    desc: "Vier Rechtsschulen, Quellen, Methodik",
+    icon: "scale",
+    color: "#6E93D6",
+    route: "/lernen/fiqh",
+    training: "fiqh",
+    lessons: [
+      { id: "madahib", title: "Alle 4 Vergleichsfragen studieren" },
+      { id: "usul-quellen", title: "Die 4 Rechtsquellen durchgehen" },
+      { id: "methoden", title: "4 Ableitungsmethoden ansehen" },
+    ],
+  },
+  {
+    id: "hadith",
+    name: "Ḥadīṯ & Uṣūl",
+    ar: "الحَدِيث",
+    desc: "Überlieferung, Isnad, Echtheit",
+    icon: "scroll",
+    color: "#D08770",
+    route: "/lernen/hadith",
+    training: "hadith",
+    lessons: [
+      { id: "lesen", title: "Alle 4 Ḥadīṯe des Karussells lesen" },
+      { id: "isnad", title: "Die Isnad-Kette studieren" },
+      { id: "skalen", title: "Echtheitsskala & Bedingungen ansehen" },
+    ],
+  },
+  {
+    id: "wissenschaft",
+    name: "Wissenschaften",
+    ar: "العُلُوم",
+    desc: "Die Landkarte des islamischen Wissens",
+    icon: "tree",
+    color: "#C9A3DE",
+    route: "/lernen/wissenschaft",
+    lessons: [
+      { id: "landkarte", title: "Alle 8 Wissenschaften öffnen" },
+      { id: "reihenfolge", title: "Die Lernreihenfolge ansehen" },
+    ],
+  },
 ];
+
+export const subjectById = (id: string): Subject | undefined =>
+  SUBJECTS.find((s) => s.id === id);
 
 export type PlanItem = { label: string; time: string; done: boolean };
 export const planItems: PlanItem[] = [
