@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Component, useEffect, type ErrorInfo, type ReactNode } from "react";
 import { HashRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import Shell from "./components/Shell";
 import Heute from "./pages/Heute";
@@ -88,6 +88,46 @@ function ScrollToTop() {
   return null;
 }
 
+/** Fängt Render-Fehler ab — statt grünem Nichts gibt es eine klare Meldung. */
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("Nūr · Render-Fehler:", error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="grid min-h-screen place-items-center px-6">
+          <div className="max-w-lg rounded-xl border border-copper-500/40 bg-pine-900 p-8 text-center">
+            <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-copper-400">Render-Fehler</p>
+            <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Etwas ist schiefgelaufen.</h1>
+            <p className="mt-3 rounded-lg border border-pine-700 bg-pine-950/60 px-4 py-3 text-left font-mono text-[12px] leading-relaxed text-copper-400">
+              {this.state.error.message}
+            </p>
+            <p className="mt-3 text-[13px] text-ink-dim">
+              Details in der Browser-Konsole (F12). Falls du eine alte Projektkopie verwendest: Dev-Server mit
+              STRG+C beenden, Projekt neu entpacken und <code className="text-gold-300">dev.bat</code> erneut starten.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-press mt-6 rounded-full bg-gold-500 px-6 py-3 text-sm font-bold text-pine-950 hover:bg-gold-400"
+            >
+              Neu laden
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /** /lernen/:subject → passende Fachseite */
 function LearnSubject() {
   const { subject } = useParams();
@@ -137,8 +177,9 @@ export default function App() {
   const safeTheme: ThemeId = THEMES.some((t) => t.id === theme) ? theme : "tannengold";
 
   return (
-    <AppProvider>
-      <HashRouter>
+    <ErrorBoundary>
+      <AppProvider>
+        <HashRouter>
         <div className="relative min-h-screen">
           <Ambient />
           <div className="relative z-10">
@@ -161,7 +202,8 @@ export default function App() {
             </Shell>
           </div>
         </div>
-      </HashRouter>
-    </AppProvider>
+        </HashRouter>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

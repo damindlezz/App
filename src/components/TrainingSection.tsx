@@ -6,7 +6,7 @@ import { INTERVALS } from "../backend/srs";
 import { Glyph, Reveal, SectionHead, toArabicDigits } from "./ui";
 import type { GlyphName } from "./ui";
 
-type Mode = "cards" | "quiz" | "drill" | "stats";
+type Mode = "cards" | "quiz" | "drill";
 
 const MODES: { id: Mode; label: string; icon: GlyphName }[] = [
   { id: "cards", label: "Karteikarten", icon: "book" },
