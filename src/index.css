@@ -27,6 +27,38 @@
   --font-arabic: "Amiri", "Scheherazade New", serif;
   --font-quran: "Amiri Quran", "Amiri", serif;
   --font-kufi: "Reem Kufi", sans-serif;
+
+  /* ---- Design B · „Layālī" (Lapisnacht) ---- */
+  --color-night-950: #071026;
+  --color-night-900: #0b1836;
+  --color-night-800: #10224c;
+  --color-night-700: #1a2f63;
+  --color-night-600: #27407f;
+  --color-ivory: #f3ecda;
+  --color-ivory-dim: #a7b4d9;
+  --color-ivory-faint: #6d7cae;
+  --color-saffron-300: #f6c877;
+  --color-saffron-400: #f0b453;
+  --color-saffron-500: #e9a63c;
+  --color-saffron-600: #c9861f;
+  --color-turq-400: #5bd8c8;
+  --color-turq-500: #34c2b2;
+  --font-marcellus: "Marcellus", Georgia, serif;
+
+  /* ---- Design C · „Faǧr" (Taglicht) ---- */
+  --color-paper: #f4f7f2;
+  --color-card: #ffffff;
+  --color-inkg: #12332b;
+  --color-inkg-soft: #4a6157;
+  --color-inkg-faint: #83968b;
+  --color-em-500: #12936c;
+  --color-em-600: #0e7c5b;
+  --color-em-700: #0b5a43;
+  --color-amb-400: #f6c453;
+  --color-amb-500: #f0b429;
+  --color-amb-600: #d99a14;
+  --color-skyb-500: #3e7cb1;
+  --font-grotesk: "Space Grotesk", "Manrope", sans-serif;
 }
 
 html {
@@ -298,6 +330,104 @@ input[type="checkbox"].plan-check:checked::after {
   height: 0.62rem;
   border: solid #05281f;
   border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(42deg);
+}
+
+/* ============================================================ */
+/* Design B · „Layālī" — Lapisnacht im Stil persischer Manuskripte */
+/* ============================================================ */
+.bg-lattice {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23E9A63C' stroke-opacity='0.06'%3E%3Crect x='28' y='28' width='40' height='40'/%3E%3Crect x='28' y='28' width='40' height='40' transform='rotate(45 48 48)'/%3E%3Cpath d='M48 0v20M48 76v20M0 48h20M76 48h20'/%3E%3Ccircle cx='48' cy='48' r='6'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.illum-frame {
+  box-shadow:
+    0 0 0 1px rgba(233, 166, 60, 0.55),
+    0 0 0 7px #0b1836,
+    0 0 0 8px rgba(233, 166, 60, 0.28),
+    0 30px 80px -30px rgba(0, 0, 0, 0.7);
+}
+
+.layali-tile {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+.layali-tile:hover {
+  transform: translateY(-5px);
+  border-color: rgba(233, 166, 60, 0.6);
+  box-shadow: 0 22px 44px -20px rgba(0, 0, 0, 0.65);
+}
+
+/* ============================================================ */
+/* Design C · „Faǧr" — helles EdTech mit harten Schatten        */
+/* ============================================================ */
+.bg-fajr-grid {
+  background-image:
+    linear-gradient(rgba(18, 51, 43, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 51, 43, 0.05) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.hard-card {
+  border: 2px solid #12332b;
+  box-shadow: 6px 6px 0 rgba(18, 51, 43, 0.92);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hard-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 9px 9px 0 rgba(18, 51, 43, 0.92);
+}
+.hard-btn {
+  border: 2px solid #12332b;
+  box-shadow: 4px 4px 0 rgba(18, 51, 43, 0.92);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.2s ease;
+}
+.hard-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 rgba(18, 51, 43, 0.92);
+}
+.hard-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 rgba(18, 51, 43, 0.92);
+}
+
+input[type="checkbox"].fajr-check {
+  appearance: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  border: 2px solid #12332b;
+  border-radius: 0.45rem;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+input[type="checkbox"].fajr-check:hover {
+  transform: scale(1.08);
+}
+input[type="checkbox"].fajr-check:checked {
+  background: #0e7c5b;
+}
+input[type="checkbox"].fajr-check:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 0.36rem;
+  height: 0.7rem;
+  border: solid #ffffff;
+  border-width: 0 2.5px 2.5px 0;
   transform: translate(-50%, -50%) rotate(42deg);
 }
 
