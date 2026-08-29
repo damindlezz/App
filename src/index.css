@@ -103,6 +103,105 @@ html[data-theme="schiefer"] {
   --color-gold-600: #5e8fbc;
 }
 
+/* ============================================================ */
+/* DESIGN-VARIANTEN zum Vergleich — html[data-design="a|b|c"]    */
+/* Stehen NACH den Farbwelten und setzen Farben, Schriften und   */
+/* Struktur (Radien, Schatten, Muster) je Variante komplett um.  */
+/* ============================================================ */
+
+/* --- Variante A · „Klassik Tannengold" (Basis, verfeinert) --- */
+html[data-design="a"] {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+}
+
+/* --- Variante B · „Lapis-Manuskript" --- */
+html[data-design="b"] {
+  --color-pine-950: #071026;
+  --color-pine-900: #0b1836;
+  --color-pine-800: #10224c;
+  --color-pine-700: #1a2f63;
+  --color-pine-600: #27407f;
+  --color-ink: #f3ecda;
+  --color-ink-dim: #a7b4d9;
+  --color-ink-faint: #6d7cae;
+  --color-gold-300: #f6c877;
+  --color-gold-400: #f0b453;
+  --color-gold-500: #e9a63c;
+  --color-gold-600: #c9861f;
+  --color-teal-400: #5bd8c8;
+  --color-teal-500: #34c2b2;
+  --font-display: "Marcellus", Georgia, serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+}
+/* B: eckig, ornamental, punktiertes Raster */
+html[data-design="b"] .rounded-xl { border-radius: 6px; }
+html[data-design="b"] .rounded-lg { border-radius: 3px; }
+html[data-design="b"] .card-hover:hover {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-gold-500) 55%, transparent),
+    0 16px 36px -18px rgba(0, 0, 0, 0.7);
+  transform: translateY(-3px);
+}
+html[data-design="b"] body {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in srgb, var(--color-gold-500) 7%, transparent) 1px,
+    transparent 1.6px
+  );
+  background-size: 26px 26px;
+}
+
+/* --- Variante C · „Faǧr Hell" --- */
+html[data-design="c"] {
+  --color-pine-950: #f4f7f2;
+  --color-pine-900: #ffffff;
+  --color-pine-800: #eef3ec;
+  --color-pine-700: #dbe6dd;
+  --color-pine-600: #c2d3c7;
+  --color-ink: #12332b;
+  --color-ink-dim: #4a6157;
+  --color-ink-faint: #83968b;
+  --color-gold-300: #8a6206;
+  --color-gold-400: #b77f0e;
+  --color-gold-500: #d99a14;
+  --color-gold-600: #b77f0e;
+  --color-teal-400: #12936c;
+  --color-teal-500: #0e7c5b;
+  --color-copper-400: #c05a4a;
+  --color-copper-500: #a84a3c;
+  --color-lapis-400: #3e7cb1;
+  --color-plum-400: #8e5fb0;
+  --font-display: "Space Grotesk", "Manrope", sans-serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+}
+/* C: weich gerundet, harte Versatz-Schatten, Millimeterpapier */
+html[data-design="c"] .rounded-xl { border-radius: 22px; }
+html[data-design="c"] .rounded-lg { border-radius: 14px; }
+html[data-design="c"] .card-hover {
+  box-shadow: 7px 7px 0 rgba(18, 51, 43, 0.09);
+}
+html[data-design="c"] .card-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 10px 10px 0 rgba(18, 51, 43, 0.13);
+}
+/* Gold-Flächen brauchen auf hellem Grund dunkle Schrift */
+html[data-design="c"] .bg-gold-500,
+html[data-design="c"] .bg-gold-400 {
+  color: #3f2b06;
+}
+html[data-design="c"] body {
+  background-image:
+    linear-gradient(rgba(18, 51, 43, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 51, 43, 0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+/* B/C: Girih-Overlay etwas zurücknehmen, damit eigene Muster wirken */
+html[data-design="b"] .girih-overlay,
+html[data-design="c"] .girih-overlay {
+  opacity: 0.35;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -144,6 +243,23 @@ body {
 }
 
 /* ---------- Bewegung ---------- */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+.breathe {
+  animation: breathe 9s ease-in-out infinite;
+  transform-origin: 50% 0%;
+  will-change: opacity, transform;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
