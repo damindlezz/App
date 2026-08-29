@@ -17,6 +17,8 @@ import { subjectById } from "./data/content";
 import { usePersistentState } from "./components/ui";
 import { THEMES } from "./themes";
 import type { ThemeId } from "./themes";
+import DesignSwitcher from "./components/DesignSwitcher";
+import type { DesignId } from "./components/DesignSwitcher";
 
 const LETTERS: { ch: string; left: string; dur: number; delay: number; size: string; o: number }[] = [
   { ch: "ا", left: "5%", dur: 52, delay: 0, size: "2.3rem", o: 0.05 },
@@ -33,7 +35,7 @@ const LETTERS: { ch: string; left: string; dur: number; delay: number; size: str
 
 function GirihPattern() {
   return (
-    <svg className="absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_75%_70%_at_50%_40%,black,transparent)]" aria-hidden>
+    <svg className="girih-overlay absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_75%_70%_at_50%_40%,black,transparent)]" aria-hidden>
       <defs>
         <pattern id="girih" width="84" height="84" patternUnits="userSpaceOnUse">
           <g fill="none" stroke="var(--color-gold-500)" strokeOpacity="0.06">
@@ -52,13 +54,19 @@ function Ambient() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
       <div
+        className="breathe absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 45% at 50% -5%, color-mix(in srgb, var(--color-gold-500) 12%, transparent), transparent 60%)",
+        }}
+      />
+      <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 45% at 50% -5%, color-mix(in srgb, var(--color-gold-500) 10%, transparent), transparent 60%)",
+            "radial-gradient(ellipse 50% 40% at 0% 100%, color-mix(in srgb, var(--color-teal-500) 7%, transparent), transparent 55%)",
         }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_0%_100%,rgba(79,193,166,0.06),transparent_55%)]" />
       <GirihPattern />
       {LETTERS.map((l, i) => (
         <span
@@ -174,10 +182,16 @@ function Training() {
 
 export default function App() {
   const [theme, setTheme] = usePersistentState<ThemeId>("nur-theme", "tannengold");
+  const [design, setDesign] = usePersistentState<DesignId>("nur-design", "a");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  /* Design-Variante (a|b|c) umschalten */
+  useEffect(() => {
+    document.documentElement.setAttribute("data-design", design);
+  }, [design]);
 
   /* Fallback, falls ein unbekanntes Theme gespeichert wurde */
   const safeTheme: ThemeId = THEMES.some((t) => t.id === theme) ? theme : "tannengold";
@@ -207,6 +221,7 @@ export default function App() {
               </Routes>
             </Shell>
           </div>
+          <DesignSwitcher design={design} setDesign={setDesign} />
         </div>
         </HashRouter>
       </AppProvider>
