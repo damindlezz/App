@@ -221,7 +221,6 @@ export default function App() {
               </Routes>
             </Shell>
           </div>
-          <DesignSwitcher design={design} setDesign={setDesign} />
         </div>
         </HashRouter>
       </AppProvider>
