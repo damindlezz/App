@@ -1,18 +1,204 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ayahOfDay,
+  dhikrPresets,
   marqueeWords,
   planItems,
+  prayerTimes,
   tracks,
 } from "../data/content";
 import type { TabId } from "./TopBar";
-import { AyahMarker, CornerOrn, Glyph, Reveal, Ring } from "./ui";
+import { AyahMarker, CornerOrn, Glyph, Reveal, Ring, usePersistentState } from "./ui";
 import type { GlyphName } from "./ui";
 
 const chips = ["Fuṣḥā A1–C1", "Taǧwīd & Ḥifẓ", "Fiqh · 4 Madhāhib", "Ḥadīṯ & Uṣūl", "ʿUlūm"];
 
+const toSeconds = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 3600 + m * 60;
+};
+
+/* ---------- Gebetszeiten mit Live-Uhr & Countdown ---------- */
+function PrayerPanel() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  let nextIdx = prayerTimes.findIndex((p) => toSeconds(p.time) > nowSec);
+  if (nextIdx === -1) nextIdx = 0;
+  const allPassed = prayerTimes.every((p) => toSeconds(p.time) <= nowSec);
+  let diff = toSeconds(prayerTimes[nextIdx].time) - nowSec;
+  if (diff < 0) diff += 86400;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const next = prayerTimes[nextIdx];
+
+  return (
+    <div className="h-full rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-7">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-gold-500">
+            Gebetszeiten · Beispiel: Berlin
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-semibold text-ink">Der Tag im Takt der Ṣalāh</h3>
+        </div>
+        <div className="text-right">
+          <p className="font-display text-4xl font-semibold tabular-nums text-ink">
+            {now.toLocaleTimeString("de-DE")}
+          </p>
+          <p className="mt-0.5 text-[11.5px] text-ink-dim">
+            {now.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-gold-500/30 bg-gold-500/[0.07] px-4 py-3">
+        <Glyph name="clock" className="h-4.5 w-4.5 text-gold-400" />
+        <p className="text-[13.5px] text-ink-dim">
+          Nächstes Gebet: <strong className="font-bold text-gold-300">{next.name}</strong>{" "}
+          <span dir="rtl" className="font-kufi text-[15px] text-gold-400">{next.ar}</span>
+        </p>
+        <p className="ml-auto font-display text-2xl font-semibold tabular-nums text-gold-300">
+          {pad(Math.floor(diff / 3600))}:{pad(Math.floor((diff % 3600) / 60))}:{pad(diff % 60)}
+        </p>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {prayerTimes.map((p, i) => {
+          const isNext = i === nextIdx;
+          const passed = !allPassed && toSeconds(p.time) <= nowSec;
+          return (
+            <div
+              key={p.name}
+              className={`rounded-lg border px-2 py-3.5 text-center transition-all duration-500 ${
+                isNext
+                  ? "border-gold-500/60 bg-gold-500/10"
+                  : passed
+                    ? "border-pine-700/60 bg-pine-950/30 opacity-45"
+                    : "border-pine-700 bg-pine-950/40"
+              }`}
+            >
+              <p className={`font-display text-[15px] font-semibold ${isNext ? "text-gold-300" : "text-ink"}`}>
+                {p.name}
+              </p>
+              <p dir="rtl" className={`font-kufi text-lg leading-tight ${isNext ? "text-gold-400" : "text-ink-dim"}`}>
+                {p.ar}
+              </p>
+              <p className={`mt-1 text-[13px] font-bold tabular-nums ${isNext ? "text-gold-300" : "text-ink-dim"}`}>
+                {p.time}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="mt-4 text-[11.5px] leading-relaxed text-ink-faint">
+        Statische Beispielzeiten für das Konzept — die fertige App berechnet die Zeiten astronomisch aus dem Standort.
+      </p>
+    </div>
+  );
+}
+
+/* ---------- Tasbīḥ-Zähler (digitaler Misbāḥ) ---------- */
+function Tasbih() {
+  const [preset, setPreset] = usePersistentState("nur-tasbih-preset", 0);
+  const [count, setCount] = usePersistentState("nur-tasbih-count", 0);
+  const [pop, setPop] = useState(false);
+  const d = dhikrPresets[preset] ?? dhikrPresets[0];
+  const inRound = count % 33;
+  const round = Math.floor(count / 33) + 1;
+  const C = 2 * Math.PI * 52;
+
+  const click = () => {
+    setCount((c) => c + 1);
+    setPop(false);
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => setPop(true)));
+  };
+
+  return (
+    <div className="flex h-full flex-col rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-7">
+      <div>
+        <p className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-gold-500">Tasbīḥ · Dhikr</p>
+        <h3 className="mt-1 font-display text-2xl font-semibold text-ink">Der digitale Misbāḥ</h3>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-2">
+        {dhikrPresets.map((p, i) => (
+          <button
+            key={p.tr}
+            onClick={() => setPreset(i)}
+            className={`btn-press rounded-lg border px-3 py-2 text-left transition-all ${
+              i === preset
+                ? "border-gold-500 bg-gold-500/10"
+                : "border-pine-700 bg-pine-950/40 hover:border-gold-500/40"
+            }`}
+          >
+            <span dir="rtl" className={`block font-quran text-lg leading-tight ${i === preset ? "text-gold-300" : "text-ink"}`}>
+              {p.ar}
+            </span>
+            <span className="block text-[11px] text-ink-faint">{p.tr}</span>
+          </button>
+        ))}
+      </div>
+
+      <p dir="rtl" className="mt-6 text-center font-quran text-3xl text-ink">{d.ar}</p>
+      <p className="mt-1 text-center text-[12.5px] italic text-ink-dim">{d.de}</p>
+
+      <button
+        onClick={click}
+        aria-label="Zähler erhöhen"
+        className="btn-press relative mx-auto mt-6 grid h-44 w-44 place-items-center rounded-full border border-gold-500/25 bg-pine-950/60 shadow-[inset_0_0_30px_rgba(216,178,92,0.06)] transition-transform hover:scale-[1.03] active:scale-95"
+      >
+        <svg className="absolute inset-1 -rotate-90" viewBox="0 0 120 120" aria-hidden>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#124437" strokeWidth="5" />
+          <circle
+            cx="60"
+            cy="60"
+            r="52"
+            fill="none"
+            stroke="#D8B25C"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray={C}
+            strokeDashoffset={C * (1 - inRound / 33)}
+            className="transition-all duration-300 ease-out"
+          />
+        </svg>
+        <span className="text-center">
+          <span
+            className={`block font-display text-5xl font-semibold text-ink transition-transform duration-150 ${
+              pop ? "scale-125" : "scale-100"
+            }`}
+          >
+            {count}
+          </span>
+          <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-ink-faint">
+            Runde {round} · /33
+          </span>
+        </span>
+      </button>
+
+      <div className="mt-auto flex items-center justify-between pt-6">
+        <button
+          onClick={() => setCount(0)}
+          className="btn-press flex items-center gap-2 rounded-full border border-pine-700 px-4 py-2 text-[12.5px] font-bold text-ink-dim hover:border-gold-500/40 hover:text-gold-300"
+        >
+          <Glyph name="reset" className="h-3.5 w-3.5" /> Nullsetzen
+        </button>
+        {count > 0 && count % 99 === 0 ? (
+          <span className="text-[12.5px] font-bold text-teal-400">99 vollendet — māšāʾallāh</span>
+        ) : (
+          <span className="text-[12px] text-ink-faint">33 je Runde · Ziel 99</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
-  const [plan, setPlan] = useState(planItems.map((p) => p.done));
+  const [plan, setPlan] = usePersistentState<boolean[]>("nur-tagesplan", planItems.map((p) => p.done));
   const doneCount = plan.filter(Boolean).length;
   const pct = Math.round((doneCount / plan.length) * 100);
 
@@ -163,8 +349,18 @@ export default function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
         </div>
       </Reveal>
 
-      {/* ---------- Tagesplan + Lernpfade ---------- */}
+      {/* ---------- Gebetszeiten + Tasbīḥ ---------- */}
       <section className="grid gap-8 py-16 lg:grid-cols-12">
+        <Reveal className="lg:col-span-7">
+          <PrayerPanel />
+        </Reveal>
+        <Reveal delay={140} className="lg:col-span-5">
+          <Tasbih />
+        </Reveal>
+      </section>
+
+      {/* ---------- Tagesplan + Lernpfade ---------- */}
+      <section className="grid gap-8 pb-16 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <Reveal>
             <div className="h-full rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-7">
@@ -196,8 +392,10 @@ export default function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
                       <input
                         type="checkbox"
                         className="plan-check"
-                        checked={plan[i]}
-                        onChange={() => setPlan((p) => p.map((v, j) => (j === i ? !v : v)))}
+                        checked={plan[i] ?? false}
+                        onChange={() =>
+                          setPlan((p) => planItems.map((_, j) => (j === i ? !(p[j] ?? false) : (p[j] ?? false))))
+                        }
                       />
                       <span
                         className={`flex-1 text-[14.5px] font-medium ${

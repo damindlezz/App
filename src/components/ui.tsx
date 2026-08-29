@@ -178,7 +178,9 @@ export type GlyphName =
   | "arrowL"
   | "arrowR"
   | "eye"
-  | "clock";
+  | "clock"
+  | "sun"
+  | "moon";
 
 export function Glyph({ name, className = "h-5 w-5" }: { name: GlyphName; className?: string }) {
   const stroke = {
@@ -331,10 +333,47 @@ export function Glyph({ name, className = "h-5 w-5" }: { name: GlyphName; classN
         </>
       );
       break;
+    case "sun":
+      body = (
+        <>
+          <circle cx="12" cy="12" r="4.2" {...stroke} />
+          <path
+            d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"
+            {...stroke}
+          />
+        </>
+      );
+      break;
+    case "moon":
+      body = <path d="M19.5 14.2A8 8 0 0 1 9.8 4.5a8 8 0 1 0 9.7 9.7Z" {...stroke} />;
+      break;
   }
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
       {body}
     </svg>
   );
+}
+
+/** Zustand, der localStorage übersteht — mit sicherem Fallback. */
+export function usePersistentState<T>(key: string, initial: T) {
+  const [val, setVal] = useState<T>(() => {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (raw !== null) return JSON.parse(raw) as T;
+    } catch {
+      /* Speicher nicht verfügbar — Standardwert nutzen */
+    }
+    return initial;
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(val));
+    } catch {
+      /* still weiterarbeiten */
+    }
+  }, [key, val]);
+
+  return [val, setVal] as const;
 }

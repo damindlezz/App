@@ -516,6 +516,131 @@ export const transmission: Transmission[] = [
   { name: "al-Ġarīb", ar: "الغريب", desc: "Āḥād mit nur einem Überlieferer an mindestens einer Stufe.", w: 20 },
 ];
 
+/* ------------------------------------------------------------------ */
+/* Gebetszeiten (statische Beispielwerte — Konzept)                     */
+/* ------------------------------------------------------------------ */
+export interface PrayerTime {
+  name: string;
+  ar: string;
+  time: string;
+}
+
+export const prayerTimes: PrayerTime[] = [
+  { name: "Faǧr", ar: "الفجر", time: "05:12" },
+  { name: "Ẓuhr", ar: "الظهر", time: "12:14" },
+  { name: "ʿAṣr", ar: "العصر", time: "15:02" },
+  { name: "Maġrib", ar: "المغرب", time: "17:38" },
+  { name: "ʿIšāʾ", ar: "العشاء", time: "19:02" },
+];
+
+/* ------------------------------------------------------------------ */
+/* Dhikr-Vorgaben für den Tasbīḥ-Zähler                                 */
+/* ------------------------------------------------------------------ */
+export interface Dhikr {
+  ar: string;
+  tr: string;
+  de: string;
+}
+
+export const dhikrPresets: Dhikr[] = [
+  { ar: "سُبْحَانَ الله", tr: "Subḥānallāh", de: "Preis sei Allah" },
+  { ar: "الْحَمْدُ لِلَّه", tr: "Alḥamdu lillāh", de: "Alles Lob gebührt Allah" },
+  { ar: "اللهُ أَكْبَر", tr: "Allāhu akbar", de: "Allah ist am Größten" },
+  { ar: "أَسْتَغْفِرُ الله", tr: "Astaġfirullāh", de: "Ich bitte Allah um Vergebung" },
+];
+
+/* ------------------------------------------------------------------ */
+/* Arabisches Alphabet — 28 Buchstaben mit Šamsī/Qamarī-Klasse          */
+/* ------------------------------------------------------------------ */
+export interface Letter {
+  l: string;
+  name: string;
+  tr: string;
+  ex: string;
+  exDe: string;
+  sun: boolean;
+}
+
+export const alphabet: Letter[] = [
+  { l: "ا", name: "Alif", tr: "ā", ex: "أَرْض", exDe: "Erde", sun: false },
+  { l: "ب", name: "Bāʾ", tr: "b", ex: "بَحْر", exDe: "Meer", sun: false },
+  { l: "ت", name: "Tāʾ", tr: "t", ex: "تُراب", exDe: "Staub, Erde", sun: true },
+  { l: "ث", name: "Ṯāʾ", tr: "ṯ", ex: "ثَمَر", exDe: "Frucht", sun: true },
+  { l: "ج", name: "Ǧīm", tr: "ǧ", ex: "جَنَّة", exDe: "Paradiesgarten", sun: false },
+  { l: "ح", name: "Ḥāʾ", tr: "ḥ", ex: "حَقّ", exDe: "Wahrheit", sun: false },
+  { l: "خ", name: "Ḫāʾ", tr: "ḫ", ex: "خَيْر", exDe: "das Gute", sun: false },
+  { l: "د", name: "Dāl", tr: "d", ex: "دُنْيا", exDe: "Diesseits", sun: true },
+  { l: "ذ", name: "Ḏāl", tr: "ḏ", ex: "ذِكْر", exDe: "Gedenken", sun: true },
+  { l: "ر", name: "Rāʾ", tr: "r", ex: "رَحْمَة", exDe: "Barmherzigkeit", sun: true },
+  { l: "ز", name: "Zāy", tr: "z", ex: "زَيْتون", exDe: "Olive", sun: true },
+  { l: "س", name: "Sīn", tr: "s", ex: "سَلام", exDe: "Friede", sun: true },
+  { l: "ش", name: "Šīn", tr: "š", ex: "شَمْس", exDe: "Sonne", sun: true },
+  { l: "ص", name: "Ṣād", tr: "ṣ", ex: "صَبْر", exDe: "Geduld", sun: true },
+  { l: "ض", name: "Ḍād", tr: "ḍ", ex: "ضِياء", exDe: "Lichtglanz", sun: true },
+  { l: "ط", name: "Ṭāʾ", tr: "ṭ", ex: "طَريق", exDe: "Weg", sun: true },
+  { l: "ظ", name: "Ẓāʾ", tr: "ẓ", ex: "ظِلّ", exDe: "Schatten", sun: true },
+  { l: "ع", name: "ʿAyn", tr: "ʿ", ex: "عِلْم", exDe: "Wissen", sun: false },
+  { l: "غ", name: "Ġayn", tr: "ġ", ex: "غَفور", exDe: "der Vergebende", sun: false },
+  { l: "ف", name: "Fāʾ", tr: "f", ex: "فَوْز", exDe: "Erfolg", sun: false },
+  { l: "ق", name: "Qāf", tr: "q", ex: "قَلْب", exDe: "Herz", sun: false },
+  { l: "ك", name: "Kāf", tr: "k", ex: "كِتاب", exDe: "Buch", sun: false },
+  { l: "ل", name: "Lām", tr: "l", ex: "لَيْل", exDe: "Nacht", sun: true },
+  { l: "م", name: "Mīm", tr: "m", ex: "ماء", exDe: "Wasser", sun: false },
+  { l: "ن", name: "Nūn", tr: "n", ex: "نُور", exDe: "Licht", sun: true },
+  { l: "ه", name: "Hāʾ", tr: "h", ex: "هُدًى", exDe: "Rechtleitung", sun: false },
+  { l: "و", name: "Wāw", tr: "w", ex: "وَحْي", exDe: "Offenbarung", sun: false },
+  { l: "ي", name: "Yāʾ", tr: "y", ex: "يَقين", exDe: "Gewissheit", sun: false },
+];
+
+/* ------------------------------------------------------------------ */
+/* Taǧwīd-Quiz                                                          */
+/* ------------------------------------------------------------------ */
+export interface QuizQ {
+  ex: { t: string; hl?: boolean }[];
+  q: string;
+  opts: string[];
+  a: number;
+  why: string;
+}
+
+export const tajweedQuiz: QuizQ[] = [
+  {
+    ex: [{ t: "مِنْ قَبْلُ", hl: true }],
+    q: "Welche Regel verbirgt sich in «مِنْ قَبْلُ»?",
+    opts: ["Iẓhār — das Nūn bleibt klar", "Iḫfāʾ — das Nūn wird verschleiert", "Iqlāb — das Nūn wird zum Mīm"],
+    a: 1,
+    why: "Auf das Nūn mit Sukūn folgt ein Qāf — einer der 15 Iḫfāʾ-Buchstaben. Das Nūn wird zwischen Klarheit und Verschmelzung gesprochen, begleitet von der Ghunna.",
+  },
+  {
+    ex: [{ t: "يَ" }, { t: "دْ", hl: true }, { t: "خُلُونَ" }],
+    q: "Welche Regel liegt auf dem Dāl in «يَدْخُلُونَ»?",
+    opts: ["Qalqala — das Echo", "Madd — die Dehnung", "Ġunna — das Näseln"],
+    a: 0,
+    why: "Dāl gehört zu den fünf Qalqala-Buchstaben (ق ط ب ج د) und trägt hier ein Sukūn mitten im Wort: Beim Sprechen löst es sich mit einem leichten Echo — Qalqala ṣuġrā.",
+  },
+  {
+    ex: [{ t: "مَ" }, { t: "نْ خَ", hl: true }, { t: "لَقَ" }],
+    q: "Wie wird das Nūn in «مَنْ خَلَقَ» gesprochen?",
+    opts: ["Mit Iqlāb als Mīm", "Verschleiert mit Iḫfāʾ", "Klar und deutlich — Iẓhār"],
+    a: 2,
+    why: "Ḫāʾ gehört zu den sechs Kehlbuchstaben — dort tritt immer Iẓhār ein: Das Nūn bleibt hell und klar, ganz ohne Ghunna.",
+  },
+  {
+    ex: [{ t: "الضَّ" }, { t: "الِّينَ", hl: true }],
+    q: "Wie viele Ḥarakāt zählt der Madd in «الضَّالِّينَ»?",
+    opts: ["2 — natürlicher Madd", "4 — Madd ʿĀriḍ", "6 — Madd Lāzim"],
+    a: 2,
+    why: "Auf den Madd-Buchstaben folgt ein durch Verdopplung entstandener Buchstabe mit Sukūn — Madd Lāzim: die volle Dehnung von 6 Ḥarakāt, wie am Ende der Fātiḥa.",
+  },
+  {
+    ex: [{ t: "سَمِيعٌ" }, { t: " بَصِيرٌ", hl: true }],
+    q: "Was geschieht mit dem Tanwīn in «سَمِيعٌ بَصِيرٌ»?",
+    opts: ["Iḫfāʾ — Verschleierung", "Iqlāb — Umwandlung zu Mīm", "Idġām — Verschmelzung"],
+    a: 1,
+    why: "Tanwīn trifft auf Bāʾ — den einzigen Iqlāb-Buchstaben. Das Nūn wandelt sich in ein verborgenes Mīm, gesprochen mit zwei Ḥarakāt Ghunna.",
+  },
+];
+
 export type Term = { term: string; ar: string; def: string };
 export const hadithTerms: Term[] = [
   { term: "as-Sanad", ar: "السَّنَد", def: "Die Überliefererkette — die Antwort auf „Wer hat es von wem gehört?“" },

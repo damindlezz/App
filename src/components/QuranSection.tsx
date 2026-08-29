@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import { fatiha, ikhlasDe, ikhlasWords, tajweedRules } from "../data/content";
-import { AyahMarker, CornerOrn, Glyph, Reveal, SectionHead } from "./ui";
+import { fatiha, ikhlasDe, ikhlasWords, tajweedQuiz, tajweedRules } from "../data/content";
+import { AyahMarker, CornerOrn, Glyph, Reveal, SectionHead, usePersistentState } from "./ui";
 
 export default function QuranSection() {
   const [ruleId, setRuleId] = useState("mad");
   const rule = tajweedRules.find((r) => r.id === ruleId) ?? tajweedRules[0];
 
-  const [shown, setShown] = useState<boolean[]>(() => ikhlasWords.map(() => false));
+  const [shown, setShown] = usePersistentState<boolean[]>("nur-hifz-ikhlas", ikhlasWords.map(() => false));
   const revealed = shown.filter(Boolean).length;
 
   const ruleColor = useMemo(() => {
@@ -157,7 +157,7 @@ export default function QuranSection() {
       </section>
 
       {/* ---------- Ḥifẓ-Trainer ---------- */}
-      <section className="pb-20 pt-16">
+      <section className="pt-16">
         <Reveal>
           <div className="rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-9">
             <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
@@ -226,6 +226,164 @@ export default function QuranSection() {
           </div>
         </Reveal>
       </section>
+
+      {/* ---------- Taǧwīd-Quiz ---------- */}
+      <section className="pb-20 pt-14">
+        <Reveal>
+          <TajweedQuiz />
+        </Reveal>
+      </section>
+    </div>
+  );
+}
+
+/* ---------- Taǧwīd-Selbsttest ---------- */
+function TajweedQuiz() {
+  const [qi, setQi] = useState(0);
+  const [chosen, setChosen] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const q = tajweedQuiz[qi];
+
+  const pick = (i: number) => {
+    if (chosen !== null) return;
+    setChosen(i);
+    if (i === q.a) setScore((s) => s + 1);
+  };
+  const next = () => {
+    if (qi + 1 < tajweedQuiz.length) {
+      setQi(qi + 1);
+      setChosen(null);
+    } else {
+      setFinished(true);
+    }
+  };
+  const restart = () => {
+    setQi(0);
+    setChosen(null);
+    setScore(0);
+    setFinished(false);
+  };
+  const msg =
+    score === tajweedQuiz.length
+      ? "Mumtāz! Dein Taǧwīd sitzt."
+      : score >= 4
+        ? "Sehr stark — fast fehlerfrei."
+        : score >= 3
+          ? "Solide Basis — ein Blick in die Werkstatt lohnt."
+          : "Zeit für eine Runde durch die Taǧwīd-Werkstatt.";
+
+  return (
+    <div className="rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-9">
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="mb-3 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.28em] text-gold-500">
+            <span className="inline-block h-px w-8 bg-gold-500/70" />
+            Selbsttest · hörst du die Regel?
+          </p>
+          <h3 className="font-display text-3xl font-semibold text-ink md:text-4xl">Das Taǧwīd-Quiz</h3>
+        </div>
+        {!finished && (
+          <p className="font-display text-lg text-gold-400">
+            {score} <span className="text-ink-faint">Punkte</span>
+          </p>
+        )}
+      </div>
+
+      {finished ? (
+        <div className="view-enter flex flex-col items-center rounded-lg border border-gold-500/25 bg-pine-950/50 px-6 py-14 text-center">
+          <p className="font-display text-7xl font-semibold text-gold-400">
+            {score}
+            <span className="text-3xl text-ink-faint"> / {tajweedQuiz.length}</span>
+          </p>
+          <p className="mt-4 max-w-md font-display text-2xl italic text-ink">{msg}</p>
+          <p dir="rtl" className="mt-3 font-kufi text-2xl text-gold-500/80">
+            {score >= 4 ? "أَحْسَنْتَ" : "وَفَّقَكَ الله"}
+          </p>
+          <button
+            onClick={restart}
+            className="btn-press mt-8 inline-flex items-center gap-2 rounded-full bg-gold-500 px-6 py-3 text-sm font-bold text-pine-950 hover:bg-gold-400"
+          >
+            <Glyph name="reset" className="h-4 w-4" /> Nochmal versuchen
+          </button>
+        </div>
+      ) : (
+        <div key={qi} className="view-enter">
+          <div className="mb-5 flex items-center gap-2">
+            {tajweedQuiz.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                  i < qi || (i === qi && chosen !== null) ? "bg-gold-500" : "bg-pine-700"
+                }`}
+              />
+            ))}
+          </div>
+
+          <div dir="rtl" className="rounded-lg border border-pine-700 bg-pine-950/50 px-5 py-7 text-center">
+            <p className="font-quran text-[2.2rem] leading-relaxed text-ink md:text-[2.6rem]">
+              {q.ex.map((s, i) => (
+                <span key={i} style={s.hl ? { color: "#E4C071" } : undefined}>
+                  {s.t}
+                </span>
+              ))}
+            </p>
+          </div>
+
+          <p className="mt-5 text-center font-display text-xl font-semibold text-ink md:text-2xl">{q.q}</p>
+
+          <div className="mx-auto mt-6 grid max-w-2xl gap-2.5">
+            {q.opts.map((opt, i) => {
+              const cls =
+                chosen === null
+                  ? "border-pine-700 bg-pine-950/40 text-ink hover:border-gold-500/50 hover:bg-pine-800/70"
+                  : i === q.a
+                    ? "border-teal-500/70 bg-teal-500/10 text-teal-400"
+                    : i === chosen
+                      ? "border-copper-500/70 bg-copper-500/10 text-copper-400"
+                      : "border-pine-700/60 bg-pine-950/30 text-ink-faint opacity-60";
+              return (
+                <button
+                  key={opt}
+                  onClick={() => pick(i)}
+                  className={`btn-press rounded-lg border px-4 py-3.5 text-left text-[14.5px] font-semibold transition-all ${cls}`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+
+          {chosen !== null && (
+            <div
+              className={`view-enter mx-auto mt-5 max-w-2xl rounded-lg border px-5 py-4 ${
+                chosen === q.a
+                  ? "border-teal-500/35 bg-teal-500/[0.07]"
+                  : "border-copper-500/35 bg-copper-500/[0.07]"
+              }`}
+            >
+              <p
+                className={`flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.18em] ${
+                  chosen === q.a ? "text-teal-400" : "text-copper-400"
+                }`}
+              >
+                <Glyph name={chosen === q.a ? "check" : "reset"} className="h-4 w-4" />
+                {chosen === q.a ? "Richtig!" : `Richtig wäre: ${q.opts[q.a]}`}
+              </p>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-ink-dim">{q.why}</p>
+              <div className="mt-4 text-right">
+                <button
+                  onClick={next}
+                  className="btn-press inline-flex items-center gap-2 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-pine-950 hover:bg-gold-400"
+                >
+                  {qi + 1 < tajweedQuiz.length ? "Nächste Frage" : "Zur Auswertung"}
+                  <Glyph name="arrowR" className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

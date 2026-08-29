@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { conjugation, roots, vocab } from "../data/content";
-import { Glyph, Reveal, SectionHead } from "./ui";
+import { alphabet, conjugation, roots, vocab } from "../data/content";
+import { Glyph, Reveal, SectionHead, usePersistentState } from "./ui";
 
 export default function ArabicSection() {
   const [rootIdx, setRootIdx] = useState(0);
   const root = roots[rootIdx];
+  const [letterIdx, setLetterIdx] = useState(0);
+  const letter = alphabet[letterIdx];
 
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState<Set<string>>(new Set());
+  const [knownAr, setKnownAr] = usePersistentState<string[]>("nur-vokabeln-gewusst", []);
   const [seen, setSeen] = useState(1);
   const card = vocab[idx];
 
@@ -21,12 +23,9 @@ export default function ArabicSection() {
   };
 
   const mark = (isKnown: boolean) => {
-    setKnown((k) => {
-      const n = new Set(k);
-      if (isKnown) n.add(card.ar);
-      else n.delete(card.ar);
-      return n;
-    });
+    setKnownAr((k) =>
+      isKnown ? (k.includes(card.ar) ? k : [...k, card.ar]) : k.filter((x) => x !== card.ar),
+    );
     advance(1);
   };
 
@@ -41,6 +40,87 @@ export default function ArabicSection() {
         ar="العَرَبِيَّة"
         desc="Rund 90 % des arabischen Wortschatzes wachsen aus dreibuchstabigen Wurzeln. Wer das Muster erkennt, versteht Wörter, die er nie gelernt hat."
       />
+
+      {/* ---------- Alphabet ---------- */}
+      <Reveal>
+        <div className="rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-8">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.26em] text-gold-500">
+                Alifbāʾ · 28 Buchstaben
+              </p>
+              <h3 className="font-display text-2xl font-semibold text-ink md:text-3xl">
+                Das Alphabet — Stein für Stein
+              </h3>
+            </div>
+            <p className="max-w-md text-[12.5px] leading-relaxed text-ink-dim">
+              Buchstabe wählen: <strong className="text-ink">Šamsī-Buchstaben</strong> (Sonne) assimilieren das Lām
+              des Artikels, bei <strong className="text-ink">Qamarī-Buchstaben</strong> (Mond) bleibt es hörbar.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+            {alphabet.map((a, i) => (
+              <button
+                key={a.l}
+                onClick={() => setLetterIdx(i)}
+                className={`btn-press group rounded-lg border px-1 py-2.5 text-center transition-all ${
+                  i === letterIdx
+                    ? "border-gold-500 bg-gold-500/15"
+                    : "border-pine-700 bg-pine-950/40 hover:-translate-y-0.5 hover:border-gold-500/40"
+                }`}
+              >
+                <span
+                  className={`block font-quran text-[1.7rem] leading-tight ${
+                    i === letterIdx ? "text-gold-300" : "text-ink group-hover:text-gold-300"
+                  }`}
+                >
+                  {a.l}
+                </span>
+                <span className="mt-0.5 block text-[10px] font-bold text-ink-faint">{a.tr}</span>
+              </button>
+            ))}
+          </div>
+
+          <div
+            key={letter.l}
+            className="view-enter mt-6 grid gap-5 rounded-lg border border-pine-700 bg-pine-950/50 p-5 md:grid-cols-12 md:items-center md:p-6"
+          >
+            <div className="text-center md:col-span-3">
+              <p dir="rtl" className="font-quran text-7xl leading-none text-gold-400">
+                {letter.l}
+              </p>
+            </div>
+            <div className="md:col-span-5">
+              <p className="font-display text-2xl font-semibold text-ink">{letter.name}</p>
+              <p className="mt-0.5 text-[13px] text-ink-dim">
+                Aussprache: <strong className="text-gold-300">{letter.tr}</strong>
+              </p>
+              <p dir="rtl" className="mt-2.5 font-quran text-3xl leading-snug text-ink">
+                {letter.ex}
+              </p>
+              <p className="text-[13px] text-ink-dim">{letter.exDe}</p>
+            </div>
+            <div className="md:col-span-4">
+              <span
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-bold ${
+                  letter.sun
+                    ? "border-copper-500/45 bg-copper-500/10 text-copper-400"
+                    : "border-lapis-500/45 bg-lapis-500/10 text-lapis-400"
+                }`}
+              >
+                <Glyph name={letter.sun ? "sun" : "moon"} className="h-4 w-4" />
+                {letter.sun ? "Šamsī · Sonnenbuchstabe" : "Qamarī · Mondbuchstabe"}
+              </span>
+              <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-dim">
+                {letter.sun
+                  ? "Wie in aš-Šams (الشَّمْس): das Lām verschmilzt mit dem Buchstaben."
+                  : "Wie in al-Qamar (القَمَر): das Lām bleibt klar gesprochen."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </Reveal>
 
       {/* ---------- Wurzel-Explorer ---------- */}
       <Reveal>
@@ -122,7 +202,7 @@ export default function ArabicSection() {
                 <h3 className="mt-1 font-display text-2xl font-semibold text-ink">Wortschatz des Quran</h3>
               </div>
               <p className="font-display text-lg text-gold-400">
-                {known.size}
+                {knownAr.length}
                 <span className="text-ink-faint"> / {vocab.length} gewusst</span>
               </p>
             </div>
@@ -130,7 +210,7 @@ export default function ArabicSection() {
             <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-pine-700">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-gold-600 to-gold-400 transition-all duration-500"
-                style={{ width: `${(known.size / vocab.length) * 100}%` }}
+                style={{ width: `${(knownAr.length / vocab.length) * 100}%` }}
               />
             </div>
 
