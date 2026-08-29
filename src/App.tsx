@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ArabicSection from "./components/ArabicSection";
 import Dashboard from "./components/Dashboard";
 import FiqhSection from "./components/FiqhSection";
@@ -7,55 +7,8 @@ import QuranSection from "./components/QuranSection";
 import SciencesSection from "./components/SciencesSection";
 import TopBar, { TABS } from "./components/TopBar";
 import type { TabId } from "./components/TopBar";
-import { Glyph } from "./components/ui";
-import Fajr from "./designs/Fajr";
-import Layali from "./designs/Layali";
-
-type DesignId = "a" | "b" | "c";
-
-const DESIGNS: { id: DesignId; name: string; hint: string; active: string }[] = [
-  { id: "a", name: "Nūr", hint: "Tannengold", active: "#D8B25C" },
-  { id: "b", name: "Layālī", hint: "Lapisnacht", active: "#E9A63C" },
-  { id: "c", name: "Faǧr", hint: "Taglicht", active: "#0E7C5B" },
-];
-
-function DesignSwitcher({ design, setDesign }: { design: DesignId; setDesign: (d: DesignId) => void }) {
-  return (
-    <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2">
-      <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#03110c]/90 py-1.5 pl-4 pr-1.5 shadow-[0_18px_50px_-12px_rgba(0,0,0,0.8)] backdrop-blur-md">
-        <span className="mr-2 hidden text-[9px] font-bold uppercase tracking-[0.26em] text-white/40 sm:block">
-          Design-Vergleich
-        </span>
-        {DESIGNS.map((d) => {
-          const active = design === d.id;
-          return (
-            <button
-              key={d.id}
-              onClick={() => setDesign(d.id)}
-              className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-[12.5px] font-bold transition-all duration-200 sm:px-4 ${
-                active ? "text-[#06231b]" : "text-white/65 hover:text-white"
-              }`}
-              style={active ? { backgroundColor: d.active } : undefined}
-              aria-pressed={active}
-            >
-              <span
-                className={`grid h-5 w-5 place-items-center rounded-full text-[10px] ${
-                  active ? "bg-[#06231b]/15" : "bg-white/10"
-                }`}
-              >
-                {d.id.toUpperCase()}
-              </span>
-              {d.name}
-              <span className={`hidden text-[10px] font-semibold md:block ${active ? "opacity-70" : "opacity-50"}`}>
-                {d.hint}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+import { Glyph, usePersistentState } from "./components/ui";
+import type { ThemeId } from "./themes";
 
 const LETTERS: { ch: string; left: string; dur: number; delay: number; size: string; o: number }[] = [
   { ch: "ا", left: "5%", dur: 52, delay: 0, size: "2.3rem", o: 0.05 },
@@ -72,13 +25,37 @@ const LETTERS: { ch: string; left: string; dur: number; delay: number; size: str
   { ch: "ح", left: "49%", dur: 56, delay: 35, size: "2.6rem", o: 0.04 },
 ];
 
+/** Girih-Muster als Inline-SVG, damit die Linienfarbe dem Thema folgt. */
+function GirihPattern() {
+  return (
+    <svg className="absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_75%_70%_at_50%_40%,black,transparent)]" aria-hidden>
+      <defs>
+        <pattern id="girih" width="84" height="84" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="var(--color-gold-500)" strokeOpacity="0.075">
+            <rect x="22" y="22" width="40" height="40" />
+            <rect x="22" y="22" width="40" height="40" transform="rotate(45 42 42)" />
+            <circle cx="42" cy="42" r="5" />
+          </g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#girih)" />
+    </svg>
+  );
+}
+
 function Ambient() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_-5%,rgba(216,178,92,0.10),transparent_60%)]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 45% at 50% -5%, color-mix(in srgb, var(--color-gold-500) 10%, transparent), transparent 60%)",
+        }}
+      />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_0%_100%,rgba(79,193,166,0.07),transparent_55%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_100%_90%,rgba(110,147,214,0.06),transparent_55%)]" />
-      <div className="bg-girih absolute inset-0 opacity-80 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_40%,black,transparent)]" />
+      <GirihPattern />
       {LETTERS.map((l, i) => (
         <span
           key={i}
@@ -178,47 +155,32 @@ function Footer({ setTab }: { setTab: (t: TabId) => void }) {
 
 export default function App() {
   const [tab, setTabState] = useState<TabId>("start");
-  const [design, setDesignState] = useState<DesignId>("a");
+  const [theme, setTheme] = usePersistentState<ThemeId>("nur-theme", "tannengold");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const setTab = (t: TabId) => {
     setTabState(t);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const setDesign = (d: DesignId) => {
-    setDesignState(d);
-    window.scrollTo({ top: 0 });
-  };
 
   return (
     <div className="relative min-h-screen">
-      {design === "a" && (
-        <>
-          <Ambient />
-          <div className="relative z-10 pb-16">
-            <TopBar tab={tab} setTab={setTab} />
-            <main key={tab} className="view-enter">
-              {tab === "start" && <Dashboard setTab={setTab} />}
-              {tab === "quran" && <QuranSection />}
-              {tab === "arabic" && <ArabicSection />}
-              {tab === "fiqh" && <FiqhSection />}
-              {tab === "hadith" && <HadithSection />}
-              {tab === "science" && <SciencesSection />}
-            </main>
-            <Footer setTab={setTab} />
-          </div>
-        </>
-      )}
-      {design === "b" && (
-        <div className="pb-16">
-          <Layali />
-        </div>
-      )}
-      {design === "c" && (
-        <div className="pb-16">
-          <Fajr />
-        </div>
-      )}
-      <DesignSwitcher design={design} setDesign={setDesign} />
+      <Ambient />
+      <div className="relative z-10">
+        <TopBar tab={tab} setTab={setTab} theme={theme} setTheme={setTheme} />
+        <main key={tab} className="view-enter">
+          {tab === "start" && <Dashboard setTab={setTab} />}
+          {tab === "quran" && <QuranSection />}
+          {tab === "arabic" && <ArabicSection />}
+          {tab === "fiqh" && <FiqhSection />}
+          {tab === "hadith" && <HadithSection />}
+          {tab === "science" && <SciencesSection />}
+        </main>
+        <Footer setTab={setTab} />
+      </div>
     </div>
   );
 }

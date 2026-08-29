@@ -1,3 +1,6 @@
+import { useEffect, useRef, useState } from "react";
+import { THEMES } from "../themes";
+import type { ThemeId } from "../themes";
 import { Glyph } from "./ui";
 
 export type TabId = "start" | "quran" | "arabic" | "fiqh" | "hadith" | "science";
@@ -11,12 +14,108 @@ export const TABS: { id: TabId; label: string }[] = [
   { id: "science", label: "Wissenschaften" },
 ];
 
+/* ---------- Farbwahl ---------- */
+function ThemePicker({ theme, setTheme }: { theme: ThemeId; setTheme: (t: ThemeId) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = THEMES.find((t) => t.id === theme) ?? THEMES[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="btn-press group flex items-center gap-2 rounded-full border border-gold-500/25 bg-pine-800/80 py-1.5 pl-1.5 pr-3 hover:border-gold-500/50"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Farbwelt wählen"
+      >
+        <span
+          className="h-6 w-6 rounded-full border border-ink/20"
+          style={{ background: `linear-gradient(135deg, ${current.base} 52%, ${current.accent} 52%)` }}
+        />
+        <span className="hidden text-[12px] font-bold text-ink md:block">{current.name}</span>
+        <svg
+          viewBox="0 0 24 24"
+          className={`h-3.5 w-3.5 text-ink-dim transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="view-enter absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-gold-500/25 bg-pine-900 p-1.5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)]">
+          <p className="px-2.5 pb-1.5 pt-2 text-[9.5px] font-bold uppercase tracking-[0.26em] text-ink-faint">
+            Farbwelt
+          </p>
+          <ul role="listbox" aria-label="Farbwelten">
+            {THEMES.map((t) => {
+              const active = t.id === theme;
+              return (
+                <li key={t.id} role="option" aria-selected={active}>
+                  <button
+                    onClick={() => {
+                      setTheme(t.id);
+                      setOpen(false);
+                    }}
+                    className={`btn-press flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors ${
+                      active ? "bg-gold-500/12" : "hover:bg-pine-800"
+                    }`}
+                  >
+                    <span
+                      className={`h-7 w-7 flex-none rounded-full border transition-transform ${
+                        active ? "scale-110 border-gold-400" : "border-ink/15"
+                      }`}
+                      style={{ background: `linear-gradient(135deg, ${t.base} 52%, ${t.accent} 52%)` }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-[13px] font-bold ${active ? "text-gold-300" : "text-ink"}`}>
+                        {t.name}
+                      </span>
+                      <span className="block truncate text-[10.5px] text-ink-faint">{t.hint}</span>
+                    </span>
+                    {active && <Glyph name="check" className="h-4 w-4 flex-none text-gold-400" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TopBar({
   tab,
   setTab,
+  theme,
+  setTheme,
 }: {
   tab: TabId;
   setTab: (t: TabId) => void;
+  theme: ThemeId;
+  setTheme: (t: ThemeId) => void;
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-gold-500/10 bg-pine-950/85 backdrop-blur-md">
@@ -44,8 +143,9 @@ export default function TopBar({
             </span>
           </button>
 
-          {/* Serie + Datum */}
-          <div className="flex items-center gap-4">
+          {/* Farbwahl + Serie + Datum */}
+          <div className="flex items-center gap-3">
+            <ThemePicker theme={theme} setTheme={setTheme} />
             <div className="pulse-glow hidden items-center gap-2.5 rounded-full border border-gold-500/25 bg-pine-800/80 py-1.5 pl-2 pr-4 sm:flex">
               <span className="grid h-7 w-7 place-items-center rounded-full bg-gold-500/15 text-gold-400">
                 <Glyph name="flame" className="h-4 w-4" />

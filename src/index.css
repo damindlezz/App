@@ -27,38 +27,80 @@
   --font-arabic: "Amiri", "Scheherazade New", serif;
   --font-quran: "Amiri Quran", "Amiri", serif;
   --font-kufi: "Reem Kufi", sans-serif;
+}
 
-  /* ---- Design B · „Layālī" (Lapisnacht) ---- */
-  --color-night-950: #071026;
-  --color-night-900: #0b1836;
-  --color-night-800: #10224c;
-  --color-night-700: #1a2f63;
-  --color-night-600: #27407f;
-  --color-ivory: #f3ecda;
-  --color-ivory-dim: #a7b4d9;
-  --color-ivory-faint: #6d7cae;
-  --color-saffron-300: #f6c877;
-  --color-saffron-400: #f0b453;
-  --color-saffron-500: #e9a63c;
-  --color-saffron-600: #c9861f;
-  --color-turq-400: #5bd8c8;
-  --color-turq-500: #34c2b2;
-  --font-marcellus: "Marcellus", Georgia, serif;
-
-  /* ---- Design C · „Faǧr" (Taglicht) ---- */
-  --color-paper: #f4f7f2;
-  --color-card: #ffffff;
-  --color-inkg: #12332b;
-  --color-inkg-soft: #4a6157;
-  --color-inkg-faint: #83968b;
-  --color-em-500: #12936c;
-  --color-em-600: #0e7c5b;
-  --color-em-700: #0b5a43;
-  --color-amb-400: #f6c453;
-  --color-amb-500: #f0b429;
-  --color-amb-600: #d99a14;
-  --color-skyb-500: #3e7cb1;
-  --font-grotesk: "Space Grotesk", "Manrope", sans-serif;
+/* ============================================================ */
+/* Farbwelten — jede überschreibt Grund-, Text- und Akzentfarbe  */
+/* ============================================================ */
+html[data-theme="lapis"] {
+  --color-pine-950: #071026;
+  --color-pine-900: #0b1836;
+  --color-pine-800: #10224c;
+  --color-pine-700: #1a2f63;
+  --color-pine-600: #27407f;
+  --color-ink: #f3ecda;
+  --color-ink-dim: #a7b4d9;
+  --color-ink-faint: #6d7cae;
+  --color-gold-300: #f6c877;
+  --color-gold-400: #f0b453;
+  --color-gold-500: #e9a63c;
+  --color-gold-600: #c9861f;
+}
+html[data-theme="sand"] {
+  --color-pine-950: #14100a;
+  --color-pine-900: #1e1710;
+  --color-pine-800: #292015;
+  --color-pine-700: #362a1c;
+  --color-pine-600: #463624;
+  --color-ink: #f4ebdd;
+  --color-ink-dim: #c0ae97;
+  --color-ink-faint: #8a7a63;
+  --color-gold-300: #f2c493;
+  --color-gold-400: #e8a86b;
+  --color-gold-500: #d98e4a;
+  --color-gold-600: #b87232;
+}
+html[data-theme="smaragd"] {
+  --color-pine-950: #04201f;
+  --color-pine-900: #06302c;
+  --color-pine-800: #0a3f39;
+  --color-pine-700: #105047;
+  --color-pine-600: #186357;
+  --color-ink: #e9f6ef;
+  --color-ink-dim: #9fc4b4;
+  --color-ink-faint: #67897c;
+  --color-gold-300: #a5ebd2;
+  --color-gold-400: #6fddb9;
+  --color-gold-500: #4fc9a4;
+  --color-gold-600: #35a585;
+}
+html[data-theme="wein"] {
+  --color-pine-950: #1d0a12;
+  --color-pine-900: #2a1019;
+  --color-pine-800: #381722;
+  --color-pine-700: #47202c;
+  --color-pine-600: #592b39;
+  --color-ink: #f6ece7;
+  --color-ink-dim: #c4a9a2;
+  --color-ink-faint: #8f7570;
+  --color-gold-300: #f2c6b8;
+  --color-gold-400: #e8a98f;
+  --color-gold-500: #d98d6e;
+  --color-gold-600: #b76e52;
+}
+html[data-theme="schiefer"] {
+  --color-pine-950: #0c1014;
+  --color-pine-900: #12181e;
+  --color-pine-800: #1a222b;
+  --color-pine-700: #232e3a;
+  --color-pine-600: #2f3d4d;
+  --color-ink: #edf2f5;
+  --color-ink-dim: #a9b8c4;
+  --color-ink-faint: #71828f;
+  --color-gold-300: #c5dcf0;
+  --color-gold-400: #9cc3e5;
+  --color-gold-500: #7fafd9;
+  --color-gold-600: #5e8fbc;
 }
 
 html {
@@ -66,28 +108,29 @@ html {
 }
 
 body {
-  background-color: #051d17;
-  color: #efe8d6;
+  background-color: var(--color-pine-950);
+  color: var(--color-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background-color 0.6s ease, color 0.6s ease;
 }
 
 ::selection {
-  background: rgba(216, 178, 92, 0.3);
-  color: #f7f0dc;
+  background: color-mix(in srgb, var(--color-gold-500) 32%, transparent);
+  color: var(--color-ink);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1a5546 transparent;
+  scrollbar-color: var(--color-pine-600) transparent;
 }
 *::-webkit-scrollbar {
   height: 8px;
   width: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #124437;
+  background: var(--color-pine-700);
   border-radius: 8px;
 }
 *::-webkit-scrollbar-track {
@@ -98,10 +141,6 @@ body {
 .noise {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   opacity: 0.05;
-}
-
-.bg-girih {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84'%3E%3Cg fill='none' stroke='%23D8B25C' stroke-opacity='0.075'%3E%3Crect x='22' y='22' width='40' height='40'/%3E%3Crect x='22' y='22' width='40' height='40' transform='rotate(45 42 42)'/%3E%3Ccircle cx='42' cy='42' r='5'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ---------- Bewegung ---------- */
@@ -149,10 +188,10 @@ body {
 @keyframes pulseGlow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(216, 178, 92, 0.22);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-gold-500) 22%, transparent);
   }
   50% {
-    box-shadow: 0 0 22px 2px rgba(216, 178, 92, 0.16);
+    box-shadow: 0 0 22px 2px color-mix(in srgb, var(--color-gold-500) 16%, transparent);
   }
 }
 
@@ -219,13 +258,13 @@ body {
   color: transparent;
   background: linear-gradient(
     100deg,
-    rgba(216, 178, 92, 0.16),
-    rgba(216, 178, 92, 0.34),
-    rgba(216, 178, 92, 0.16)
+    color-mix(in srgb, var(--color-gold-500) 16%, transparent),
+    color-mix(in srgb, var(--color-gold-500) 34%, transparent),
+    color-mix(in srgb, var(--color-gold-500) 16%, transparent)
   );
   background-size: 200% 100%;
   border-radius: 0.35em;
-  box-shadow: inset 0 0 0 1px rgba(216, 178, 92, 0.28);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-gold-500) 28%, transparent);
   cursor: pointer;
   animation: shimmer 2.6s linear infinite;
 }
@@ -235,7 +274,7 @@ body {
   }
 }
 .hifz-hidden:hover {
-  box-shadow: inset 0 0 0 1px rgba(240, 212, 138, 0.7);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-gold-300) 70%, transparent);
 }
 
 /* ---------- Āya-Marker ---------- */
@@ -246,11 +285,11 @@ body {
   width: 1.75em;
   height: 1.75em;
   margin-inline: 0.35em;
-  border: 1px solid rgba(216, 178, 92, 0.55);
+  border: 1px solid color-mix(in srgb, var(--color-gold-500) 55%, transparent);
   border-radius: 9999px;
   box-shadow:
-    0 0 0 3px #082a22,
-    0 0 0 4px rgba(216, 178, 92, 0.35);
+    0 0 0 3px var(--color-pine-900),
+    0 0 0 4px color-mix(in srgb, var(--color-gold-500) 35%, transparent);
   font-family: var(--font-kufi);
   font-size: 0.42em;
   line-height: 1;
@@ -308,9 +347,9 @@ input[type="checkbox"].plan-check {
   width: 1.25rem;
   height: 1.25rem;
   flex: none;
-  border: 1.5px solid rgba(216, 178, 92, 0.5);
+  border: 1.5px solid color-mix(in srgb, var(--color-gold-500) 50%, transparent);
   border-radius: 0.4rem;
-  background: rgba(13, 53, 43, 0.5);
+  background: color-mix(in srgb, var(--color-pine-800) 55%, transparent);
   cursor: pointer;
   position: relative;
   transition:
@@ -330,104 +369,6 @@ input[type="checkbox"].plan-check:checked::after {
   height: 0.62rem;
   border: solid #05281f;
   border-width: 0 2px 2px 0;
-  transform: translate(-50%, -50%) rotate(42deg);
-}
-
-/* ============================================================ */
-/* Design B · „Layālī" — Lapisnacht im Stil persischer Manuskripte */
-/* ============================================================ */
-.bg-lattice {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23E9A63C' stroke-opacity='0.06'%3E%3Crect x='28' y='28' width='40' height='40'/%3E%3Crect x='28' y='28' width='40' height='40' transform='rotate(45 48 48)'/%3E%3Cpath d='M48 0v20M48 76v20M0 48h20M76 48h20'/%3E%3Ccircle cx='48' cy='48' r='6'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-.illum-frame {
-  box-shadow:
-    0 0 0 1px rgba(233, 166, 60, 0.55),
-    0 0 0 7px #0b1836,
-    0 0 0 8px rgba(233, 166, 60, 0.28),
-    0 30px 80px -30px rgba(0, 0, 0, 0.7);
-}
-
-.layali-tile {
-  transition:
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    background-color 0.3s ease;
-}
-.layali-tile:hover {
-  transform: translateY(-5px);
-  border-color: rgba(233, 166, 60, 0.6);
-  box-shadow: 0 22px 44px -20px rgba(0, 0, 0, 0.65);
-}
-
-/* ============================================================ */
-/* Design C · „Faǧr" — helles EdTech mit harten Schatten        */
-/* ============================================================ */
-.bg-fajr-grid {
-  background-image:
-    linear-gradient(rgba(18, 51, 43, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(18, 51, 43, 0.05) 1px, transparent 1px);
-  background-size: 34px 34px;
-}
-
-.hard-card {
-  border: 2px solid #12332b;
-  box-shadow: 6px 6px 0 rgba(18, 51, 43, 0.92);
-  transition:
-    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.hard-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 9px 9px 0 rgba(18, 51, 43, 0.92);
-}
-.hard-btn {
-  border: 2px solid #12332b;
-  box-shadow: 4px 4px 0 rgba(18, 51, 43, 0.92);
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.2s ease;
-}
-.hard-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0 rgba(18, 51, 43, 0.92);
-}
-.hard-btn:active {
-  transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 rgba(18, 51, 43, 0.92);
-}
-
-input[type="checkbox"].fajr-check {
-  appearance: none;
-  width: 1.4rem;
-  height: 1.4rem;
-  flex: none;
-  border: 2px solid #12332b;
-  border-radius: 0.45rem;
-  background: #ffffff;
-  cursor: pointer;
-  position: relative;
-  transition:
-    background 0.2s ease,
-    transform 0.15s ease;
-}
-input[type="checkbox"].fajr-check:hover {
-  transform: scale(1.08);
-}
-input[type="checkbox"].fajr-check:checked {
-  background: #0e7c5b;
-}
-input[type="checkbox"].fajr-check:checked::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 44%;
-  width: 0.36rem;
-  height: 0.7rem;
-  border: solid #ffffff;
-  border-width: 0 2.5px 2.5px 0;
   transform: translate(-50%, -50%) rotate(42deg);
 }
 
