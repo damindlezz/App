@@ -1,13 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useApp } from "../backend/store";
 import { imams, issues, madhabMeta, usulMethods, usulSources } from "../data/content";
 import { Glyph, Reveal, SectionHead } from "./ui";
 
 export default function FiqhSection() {
+  const app = useApp();
   const [issueIdx, setIssueIdx] = useState(0);
   const issue = issues[issueIdx];
 
   const [srcIdx, setSrcIdx] = useState(0);
   const [methodIdx, setMethodIdx] = useState(0);
+
+  /* Lektions-Tracking aus echtem Verhalten */
+  const [visitedIssues, setVisitedIssues] = useState<Set<number>>(() => new Set([0]));
+  const [visitedSrcs, setVisitedSrcs] = useState<Set<number>>(() => new Set([0]));
+  const [visitedMethods, setVisitedMethods] = useState<Set<number>>(() => new Set([0]));
+  useEffect(() => setVisitedIssues((s) => (s.has(issueIdx) ? s : new Set(s).add(issueIdx))), [issueIdx]);
+  useEffect(() => setVisitedSrcs((s) => (s.has(srcIdx) ? s : new Set(s).add(srcIdx))), [srcIdx]);
+  useEffect(() => setVisitedMethods((s) => (s.has(methodIdx) ? s : new Set(s).add(methodIdx))), [methodIdx]);
+  useEffect(() => {
+    if (visitedIssues.size >= issues.length) app.completeLesson("fiqh", "madahib");
+  }, [visitedIssues, app]);
+  useEffect(() => {
+    if (visitedSrcs.size >= usulSources.length) app.completeLesson("fiqh", "usul-quellen");
+  }, [visitedSrcs, app]);
+  useEffect(() => {
+    if (visitedMethods.size >= 4) app.completeLesson("fiqh", "methoden");
+  }, [visitedMethods, app]);
 
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">

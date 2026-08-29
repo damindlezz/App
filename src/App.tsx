@@ -1,15 +1,21 @@
-import { useEffect, useState } from "react";
-import { AppProvider } from "./backend/store";
+import { useEffect } from "react";
+import { HashRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
+import Shell from "./components/Shell";
+import Heute from "./pages/Heute";
+import LearnHub from "./pages/LearnHub";
+import Fortschritt from "./pages/Fortschritt";
+import Einstellungen from "./pages/Einstellungen";
+import QuranSection from "./components/QuranSection";
 import ArabicSection from "./components/ArabicSection";
-import Dashboard from "./components/Dashboard";
 import FiqhSection from "./components/FiqhSection";
 import HadithSection from "./components/HadithSection";
-import QuranSection from "./components/QuranSection";
 import SciencesSection from "./components/SciencesSection";
+import MushafView from "./components/MushafView";
 import TrainingSection from "./components/TrainingSection";
-import TopBar, { TABS } from "./components/TopBar";
-import type { TabId } from "./components/TopBar";
-import { Glyph, usePersistentState } from "./components/ui";
+import { AppProvider } from "./backend/store";
+import { subjectById } from "./data/content";
+import { usePersistentState } from "./components/ui";
+import { THEMES } from "./themes";
 import type { ThemeId } from "./themes";
 
 const LETTERS: { ch: string; left: string; dur: number; delay: number; size: string; o: number }[] = [
@@ -23,17 +29,14 @@ const LETTERS: { ch: string; left: string; dur: number; delay: number; size: str
   { ch: "س", left: "72%", dur: 54, delay: 18, size: "2.1rem", o: 0.05 },
   { ch: "ب", left: "81%", dur: 62, delay: 9, size: "1.9rem", o: 0.055 },
   { ch: "ت", left: "90%", dur: 46, delay: 26, size: "2.3rem", o: 0.045 },
-  { ch: "ي", left: "37%", dur: 70, delay: 30, size: "1.5rem", o: 0.06 },
-  { ch: "ح", left: "49%", dur: 56, delay: 35, size: "2.6rem", o: 0.04 },
 ];
 
-/** Girih-Muster als Inline-SVG, damit die Linienfarbe dem Thema folgt. */
 function GirihPattern() {
   return (
     <svg className="absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_75%_70%_at_50%_40%,black,transparent)]" aria-hidden>
       <defs>
         <pattern id="girih" width="84" height="84" patternUnits="userSpaceOnUse">
-          <g fill="none" stroke="var(--color-gold-500)" strokeOpacity="0.075">
+          <g fill="none" stroke="var(--color-gold-500)" strokeOpacity="0.06">
             <rect x="22" y="22" width="40" height="40" />
             <rect x="22" y="22" width="40" height="40" transform="rotate(45 42 42)" />
             <circle cx="42" cy="42" r="5" />
@@ -55,8 +58,7 @@ function Ambient() {
             "radial-gradient(ellipse 60% 45% at 50% -5%, color-mix(in srgb, var(--color-gold-500) 10%, transparent), transparent 60%)",
         }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_0%_100%,rgba(79,193,166,0.07),transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_100%_90%,rgba(110,147,214,0.06),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_0%_100%,rgba(79,193,166,0.06),transparent_55%)]" />
       <GirihPattern />
       {LETTERS.map((l, i) => (
         <span
@@ -80,112 +82,86 @@ function Ambient() {
   );
 }
 
-function Footer({ setTab }: { setTab: (t: TabId) => void }) {
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => window.scrollTo({ top: 0 }), [pathname]);
+  return null;
+}
+
+/** /lernen/:subject → passende Fachseite */
+function LearnSubject() {
+  const { subject } = useParams();
+  const s = subjectById(subject ?? "");
+  if (!s) return <Navigate to="/lernen" replace />;
   return (
-    <footer className="relative z-10 mt-8 border-t border-gold-500/12 bg-pine-950/80">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-12 md:px-8">
-        <div className="md:col-span-5">
-          <div className="flex items-center gap-3">
-            <Glyph name="star8" className="h-9 w-9 text-gold-500" />
-            <div className="leading-none">
-              <p className="font-display text-xl font-semibold tracking-[0.06em] text-ink">
-                NŪR<span className="text-gold-500">.</span>
-              </p>
-              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.3em] text-ink-dim">Quran-Akademie</p>
-            </div>
-            <span dir="rtl" className="font-kufi text-lg text-gold-500/85">نُور</span>
-          </div>
-          <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-ink-dim">
-            Konzeptstudie einer Lern-App: Arabisch Fuṣḥā, Quran & Taǧwīd, Fiqh der vier Schulen, Ḥadīṯ mit
-            Isnad-Verständnis und die Landkarte der islamischen Wissenschaften.
-          </p>
-          <p dir="rtl" className="mt-5 font-quran text-xl text-gold-500/70">
-            بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ
-          </p>
-        </div>
-
-        <div className="md:col-span-3">
-          <p className="mb-3.5 text-[10.5px] font-bold uppercase tracking-[0.26em] text-gold-500">Module</p>
-          <ul className="space-y-2">
-            {TABS.filter((t) => t.id !== "start").map((t) => (
-              <li key={t.id}>
-                <button
-                  onClick={() => setTab(t.id)}
-                  className="group flex items-center gap-2 text-[13.5px] font-semibold text-ink-dim transition-colors hover:text-gold-300"
-                >
-                  <span className="h-px w-3 bg-gold-600/50 transition-all group-hover:w-5 group-hover:bg-gold-400" />
-                  {t.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="md:col-span-4">
-          <p className="mb-3.5 text-[10.5px] font-bold uppercase tracking-[0.26em] text-gold-500">Adab des Lernens</p>
-          <p className="text-[13.5px] leading-relaxed text-ink-dim">
-            Diese App ist ein Lernbegleiter — sie ersetzt keinen qualifizierten Gelehrten (ʿĀlim) und keine
-            Iǧāza. Fiqh-Vergleiche sind vereinfachte Lernübersichten, keine Fetwen. Überlieferungen sind mit
-            Quelle und Echtheitsstufe gekennzeichnet.
-          </p>
-          <p className="mt-4 flex items-center gap-2 text-[12.5px] text-ink-faint">
-            <Glyph name="beads" className="h-4 w-4 text-gold-500/70" />
-            Wer Wissen sucht, sucht zuerst die Aufrichtigkeit.
-          </p>
-        </div>
-      </div>
-
-      <div className="border-t border-gold-500/10">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4 md:px-8">
-          <p className="text-[11.5px] text-ink-faint">
-            Nūr · Konzeptstudie <span className="text-gold-600">✦</span> 1447 n. H. / 2026
-          </p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="btn-press flex items-center gap-2 rounded-full border border-pine-700 px-4 py-1.5 text-[11.5px] font-bold text-ink-dim hover:border-gold-500/40 hover:text-gold-300"
-          >
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
-            </svg>
-            Nach oben
-          </button>
-        </div>
-      </div>
-    </footer>
+    <div key={s.id} className="view-enter">
+      {s.id === "quran" && <QuranSection />}
+      {s.id === "arabisch" && <ArabicSection />}
+      {s.id === "fiqh" && <FiqhSection />}
+      {s.id === "hadith" && <HadithSection />}
+      {s.id === "wissenschaft" && <SciencesSection />}
+    </div>
   );
 }
 
+/** /mushaf/:surah? → Muṣḥaf-Browser mit Deep-Link */
+function Mushaf() {
+  const { surah } = useParams();
+  const n = surah ? Math.min(114, Math.max(1, Number(surah) || 1)) : 1;
+  return (
+    <div className="mx-auto max-w-7xl px-5 pb-16 pt-8 md:px-8">
+      <p className="mb-5 text-[11px] font-bold uppercase tracking-[0.28em] text-gold-500">
+        Muṣḥaf · Sūra {n} — direkt verlinkbar
+      </p>
+      <MushafView initialSurah={n} />
+    </div>
+  );
+}
+
+/** /training/... → zentrale Trainings-Engine mit Deep-Links */
+function Training() {
+  const { mode, cat } = useParams();
+  const m: "cards" | "quiz" | "drill" =
+    mode === "quiz" || mode === "drill" ? mode : "cards";
+  return <TrainingSection initialMode={m} initialCat={cat} />;
+}
+
 export default function App() {
-  const [tab, setTabState] = useState<TabId>("start");
   const [theme, setTheme] = usePersistentState<ThemeId>("nur-theme", "tannengold");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  const setTab = (t: TabId) => {
-    setTabState(t);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  /* Fallback, falls ein unbekanntes Theme gespeichert wurde */
+  const safeTheme: ThemeId = THEMES.some((t) => t.id === theme) ? theme : "tannengold";
 
   return (
     <AppProvider>
-      <div className="relative min-h-screen">
-        <Ambient />
-        <div className="relative z-10">
-          <TopBar tab={tab} setTab={setTab} theme={theme} setTheme={setTheme} />
-          <main key={tab} className="view-enter">
-            {tab === "start" && <Dashboard setTab={setTab} />}
-            {tab === "quran" && <QuranSection />}
-            {tab === "arabic" && <ArabicSection />}
-            {tab === "fiqh" && <FiqhSection />}
-            {tab === "hadith" && <HadithSection />}
-            {tab === "science" && <SciencesSection />}
-            {tab === "training" && <TrainingSection />}
-          </main>
-          <Footer setTab={setTab} />
+      <HashRouter>
+        <div className="relative min-h-screen">
+          <Ambient />
+          <div className="relative z-10">
+            <Shell>
+              <ScrollToTop />
+              <Routes>
+                <Route path="/" element={<Navigate to="/heute" replace />} />
+                <Route path="/heute" element={<Heute />} />
+                <Route path="/lernen" element={<LearnHub />} />
+                <Route path="/lernen/:subject" element={<LearnSubject />} />
+                <Route path="/mushaf" element={<Mushaf />} />
+                <Route path="/mushaf/:surah" element={<Mushaf />} />
+                <Route path="/training" element={<Training />} />
+                <Route path="/training/:mode" element={<Training />} />
+                <Route path="/training/:mode/:cat" element={<Training />} />
+                <Route path="/fortschritt" element={<Fortschritt />} />
+                <Route path="/einstellungen" element={<Einstellungen theme={safeTheme} setTheme={setTheme} />} />
+                <Route path="*" element={<Navigate to="/heute" replace />} />
+              </Routes>
+            </Shell>
+          </div>
         </div>
-      </div>
+      </HashRouter>
     </AppProvider>
   );
 }

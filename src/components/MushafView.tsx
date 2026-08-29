@@ -17,6 +17,7 @@ import {
   useBookmarks,
   type SurahFull,
 } from "../backend/quran";
+import { useApp } from "../backend/store";
 import { AyahMarker, Glyph, toArabicDigits } from "./ui";
 
 type Mode = "surah" | "juz" | "page";
@@ -27,12 +28,14 @@ const MODES: { id: Mode; label: string }[] = [
   { id: "page", label: "Seite" },
 ];
 
-export default function MushafView() {
+export default function MushafView({ initialSurah = 1 }: { initialSurah?: number }) {
   const [mode, setMode] = useState<Mode>("surah");
-  const [surahN, setSurahN] = useState(1);
+  const [surahN, setSurahN] = useState(initialSurah);
   const [juzN, setJuzN] = useState(30);
   const [pageN, setPageN] = useState(604);
   const [anchor, setAnchor] = useState<number | null>(null);
+
+  useEffect(() => setSurahN(initialSurah), [initialSurah]);
 
   return (
     <div>
@@ -208,6 +211,7 @@ function SurahReader({
   const [audioNote, setAudioNote] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const bookmarks = useBookmarks();
+  const app = useApp();
   const meta = surahMeta(n);
 
   useEffect(() => {
@@ -219,12 +223,13 @@ function SurahReader({
         if (!alive) return;
         setData(d);
         setStatus("ready");
+        app.completeLesson("quran", "lesung");
       })
       .catch(() => alive && setStatus("error"));
     return () => {
       alive = false;
     };
-  }, [n]);
+  }, [n, app]);
 
   useEffect(() => {
     if (status !== "ready" || anchor === null) return;

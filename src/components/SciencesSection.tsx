@@ -1,11 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useApp } from "../backend/store";
 import { orderSteps, sciences } from "../data/content";
 import { Glyph, Reveal, SectionHead } from "./ui";
 import type { GlyphName } from "./ui";
 
 export default function SciencesSection() {
+  const app = useApp();
   const [sciId, setSciId] = useState("aqida");
   const sci = sciences.find((s) => s.id === sciId) ?? sciences[0];
+
+  /* Lektions-Tracking: geöffnete Wissenschaften + angesehene Reihenfolge */
+  const [visited, setVisited] = useState<Set<string>>(() => new Set(["aqida"]));
+  useEffect(() => setVisited((s) => (s.has(sciId) ? s : new Set(s).add(sciId))), [sciId]);
+  useEffect(() => {
+    if (visited.size >= sciences.length) app.completeLesson("wissenschaft", "landkarte");
+  }, [visited, app]);
+  useEffect(() => {
+    app.completeLesson("wissenschaft", "reihenfolge");
+  }, [app]);
 
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">

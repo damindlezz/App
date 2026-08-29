@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useApp } from "../backend/store";
 import { grades, hadiths, hadithTerms, sahihConditions, transmission } from "../data/content";
 import { Glyph, Reveal, SectionHead, toArabicDigits } from "./ui";
 
 export default function HadithSection() {
+  const app = useApp();
   const [hIdx, setHIdx] = useState(0);
   const h = hadiths[hIdx];
   const chain = hadiths[0].chain ?? [];
+
+  /* Lektions-Tracking: gelesene Ḥadīṯe, Isnad & Skalen (beim Ansehen) */
+  const [read, setRead] = useState<Set<number>>(() => new Set([0]));
+  useEffect(() => setRead((s) => (s.has(hIdx) ? s : new Set(s).add(hIdx))), [hIdx]);
+  useEffect(() => {
+    if (read.size >= hadiths.length) app.completeLesson("hadith", "lesen");
+  }, [read, app]);
+  useEffect(() => {
+    app.completeLesson("hadith", "isnad");
+    app.completeLesson("hadith", "skalen");
+  }, [app]);
 
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">

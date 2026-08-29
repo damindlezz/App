@@ -1,14 +1,35 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useApp } from "../backend/store";
 import { fatiha, ikhlasDe, ikhlasWords, tajweedQuiz, tajweedRules } from "../data/content";
 import MushafView from "./MushafView";
-import { AyahMarker, CornerOrn, Glyph, Reveal, SectionHead, usePersistentState } from "./ui";
+import { AyahMarker, CornerOrn, Glyph, Reveal, SectionHead } from "./ui";
 
 export default function QuranSection() {
+  const app = useApp();
   const [ruleId, setRuleId] = useState("mad");
   const rule = tajweedRules.find((r) => r.id === ruleId) ?? tajweedRules[0];
 
-  const [shown, setShown] = usePersistentState<boolean[]>("nur-hifz-ikhlas", ikhlasWords.map(() => false));
+  /* Ḥifẓ-Status aus dem zentralen Fortschritt (statt localStorage-Fragment) */
+  const shown = app.hifzOf(112);
   const revealed = shown.filter(Boolean).length;
+
+  /* Lektions-Tracking: besuchte Taǧwīd-Regeln */
+  const [visitedRules, setVisitedRules] = useState<Set<string>>(() => new Set([ruleId]));
+  useEffect(() => {
+    setVisitedRules((s) => (s.has(ruleId) ? s : new Set(s).add(ruleId)));
+  }, [ruleId]);
+  useEffect(() => {
+    if (visitedRules.size >= 7) app.completeLesson("quran", "tajweed-regeln");
+  }, [visitedRules, app]);
+
+  /* Lektions-Tracking: Wort-für-Wort-Studie (alle 7 Wörter berührt) */
+  const [touchedWords, setTouchedWords] = useState<Set<number>>(new Set());
+  const touchWord = (i: number) =>
+    setTouchedWords((s) => (s.has(i) ? s : new Set(s).add(i)));
+  useEffect(() => {
+    if (touchedWords.size >= 7) app.completeLesson("quran", "wort");
+  }, [touchedWords, app]);
 
   const ruleColor = useMemo(() => {
     const map: Record<string, string> = {};
@@ -73,6 +94,8 @@ export default function QuranSection() {
                   <span
                     key={i}
                     tabIndex={0}
+                    onMouseEnter={() => touchWord(i)}
+                    onFocus={() => touchWord(i)}
                     className="group/w relative inline-block cursor-help rounded transition-transform duration-200 hover:-translate-y-1 focus:outline-none"
                     style={w.rule ? { color: ruleColor[w.rule] } : undefined}
                   >
@@ -211,17 +234,18 @@ export default function QuranSection() {
 
             <div dir="rtl" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-5 rounded-lg border border-pine-700 bg-pine-950/50 px-5 py-9 font-quran text-[1.9rem] leading-relaxed text-ink md:text-[2.3rem]">
               {ikhlasWords.map((w, i) => (
-                <span
+                <button
                   key={i}
-                  onClick={() => setShown((s) => s.map((v, j) => (j === i ? true : v)))}
+                  onClick={() => app.setHifzWord(112, i, true)}
                   title={shown[i] ? w : "Zum Aufdecken klicken"}
-                  className={`inline-block transition-all duration-300 ${
+                  aria-label={shown[i] ? w : "Wort aufdecken"}
+                  className={`inline-block cursor-pointer rounded transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
                     shown[i] ? "text-ink" : "hifz-hidden"
                   }`}
                 >
                   {w}
                   {(i === 3 || i === 5 || i === 9) && <AyahMarker n={i === 3 ? 1 : i === 5 ? 2 : 3} />}
-                </span>
+                </button>
               ))}
               <AyahMarker n={4} />
             </div>
@@ -230,19 +254,19 @@ export default function QuranSection() {
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
-                onClick={() => setShown(ikhlasWords.map(() => false))}
+                onClick={() => ikhlasWords.forEach((_, i) => app.setHifzWord(112, i, false))}
                 className="btn-press inline-flex items-center gap-2 rounded-full border border-gold-500/30 px-5 py-2.5 text-sm font-semibold text-gold-300 hover:bg-gold-500/10"
               >
                 <Glyph name="reset" className="h-4 w-4" /> Zurücksetzen
               </button>
               <button
-                onClick={() => setShown(ikhlasWords.map(() => Math.random() > 0.55))}
+                onClick={() => ikhlasWords.forEach((_, i) => app.setHifzWord(112, i, Math.random() > 0.55))}
                 className="btn-press inline-flex items-center gap-2 rounded-full border border-lapis-500/40 px-5 py-2.5 text-sm font-semibold text-lapis-400 hover:bg-lapis-500/10"
               >
                 <Glyph name="shuffle" className="h-4 w-4" /> Neu mischen
               </button>
               <button
-                onClick={() => setShown(ikhlasWords.map(() => true))}
+                onClick={() => ikhlasWords.forEach((_, i) => app.setHifzWord(112, i, true))}
                 className="btn-press inline-flex items-center gap-2 rounded-full border border-teal-500/40 px-5 py-2.5 text-sm font-semibold text-teal-400 hover:bg-teal-500/10"
               >
                 <Glyph name="eye" className="h-4 w-4" /> Alles zeigen
@@ -252,18 +276,36 @@ export default function QuranSection() {
         </Reveal>
       </section>
 
-      {/* ---------- Taǧwīd-Quiz ---------- */}
+      {/* ---------- Hinweis: Quiz zentral im Training ---------- */}
       <section className="pb-20 pt-14">
         <Reveal>
-          <TajweedQuiz />
+          <Link
+            to="/training/quiz/tajweed"
+            className="card-hover group flex flex-wrap items-center gap-5 rounded-xl border border-gold-500/25 bg-pine-900/70 p-6"
+          >
+            <span className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-gold-500/12 text-gold-400">
+              <Glyph name="compass" className="h-6 w-6" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-xl font-semibold text-ink">
+                Taǧwīd-Selbsttest — jetzt in der zentralen Quiz-Arena
+              </span>
+              <span className="mt-0.5 block text-[13px] text-ink-dim">
+                Alle Regeln als Fragen mit Erklärungen, Bestleistung und XP — gemeinsam mit Fiqh, Ḥadīṯ und Grammatik.
+              </span>
+            </span>
+            <span className="btn-press inline-flex flex-none items-center gap-2 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-pine-950 group-hover:bg-gold-400">
+              Quiz öffnen <Glyph name="arrowR" className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </span>
+          </Link>
         </Reveal>
       </section>
     </div>
   );
 }
 
-/* ---------- Taǧwīd-Selbsttest ---------- */
-function TajweedQuiz() {
+/* ---------- Taǧwīd-Selbsttest (veraltet: Fragen leben jetzt in der Quiz-Arena, src/backend/bank.ts) ---------- */
+export function TajweedQuiz() {
   const [qi, setQi] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [score, setScore] = useState(0);

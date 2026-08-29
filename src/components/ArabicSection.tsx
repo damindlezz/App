@@ -1,33 +1,31 @@
-import { useState } from "react";
-import { alphabet, conjugation, roots, vocab } from "../data/content";
-import { Glyph, Reveal, SectionHead, usePersistentState } from "./ui";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useApp } from "../backend/store";
+import { alphabet, conjugation, roots } from "../data/content";
+import { Glyph, Reveal, SectionHead } from "./ui";
 
 export default function ArabicSection() {
+  const app = useApp();
   const [rootIdx, setRootIdx] = useState(0);
   const root = roots[rootIdx];
   const [letterIdx, setLetterIdx] = useState(0);
   const letter = alphabet[letterIdx];
 
-  const [idx, setIdx] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [knownAr, setKnownAr] = usePersistentState<string[]>("nur-vokabeln-gewusst", []);
-  const [seen, setSeen] = useState(1);
-  const card = vocab[idx];
-
-  const advance = (delta: number) => {
-    setFlipped(false);
-    window.setTimeout(() => {
-      setIdx((i) => (i + delta + vocab.length) % vocab.length);
-      setSeen((s) => Math.min(vocab.length, s + 1));
-    }, 240);
-  };
-
-  const mark = (isKnown: boolean) => {
-    setKnownAr((k) =>
-      isKnown ? (k.includes(card.ar) ? k : [...k, card.ar]) : k.filter((x) => x !== card.ar),
-    );
-    advance(1);
-  };
+  /* Lektions-Tracking aus echtem Verhalten */
+  const [visitedLetters, setVisitedLetters] = useState<Set<number>>(() => new Set([0]));
+  const [visitedRoots, setVisitedRoots] = useState<Set<number>>(() => new Set([0]));
+  const [visitedTenses, setVisitedTenses] = useState<Set<string>>(() => new Set(["past"]));
+  useEffect(() => setVisitedLetters((s) => (s.has(letterIdx) ? s : new Set(s).add(letterIdx))), [letterIdx]);
+  useEffect(() => setVisitedRoots((s) => (s.has(rootIdx) ? s : new Set(s).add(rootIdx))), [rootIdx]);
+  useEffect(() => {
+    if (visitedLetters.size >= 10) app.completeLesson("arabisch", "alphabet");
+  }, [visitedLetters, app]);
+  useEffect(() => {
+    if (visitedRoots.size >= 4) app.completeLesson("arabisch", "wurzeln");
+  }, [visitedRoots, app]);
+  useEffect(() => {
+    if (visitedTenses.size >= 2) app.completeLesson("arabisch", "konjugation");
+  }, [visitedTenses, app]);
 
   const [tense, setTense] = useState<"past" | "present">("past");
   const conj = conjugation[tense];
@@ -191,89 +189,45 @@ export default function ArabicSection() {
         </div>
       </Reveal>
 
-      {/* ---------- Karteikarten + Konjugation ---------- */}
+      {/* ---------- Vokabeln (zentral im Training) + Konjugation ---------- */}
       <section className="grid gap-8 py-16 lg:grid-cols-2">
-        {/* Karteikarten */}
+        {/* Vokabeln → zentraler Trainer */}
         <Reveal>
-          <div className="h-full rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-7">
-            <div className="mb-5 flex items-end justify-between gap-4">
+          <Link
+            to="/training"
+            className="card-hover group flex h-full flex-col rounded-xl border border-gold-500/15 bg-pine-900/70 p-6 md:p-7"
+          >
+            <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-gold-500">Karteikarten · Vokabeln</p>
                 <h3 className="mt-1 font-display text-2xl font-semibold text-ink">Wortschatz des Quran</h3>
               </div>
               <p className="font-display text-lg text-gold-400">
-                {knownAr.length}
-                <span className="text-ink-faint"> / {vocab.length} gewusst</span>
+                {app.vocabMastered}
+                <span className="text-ink-faint"> / {app.vocabTotal} gemeistert</span>
               </p>
             </div>
 
-            <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-pine-700">
+            <div className="mb-4 mt-4 h-1.5 overflow-hidden rounded-full bg-pine-700">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-gold-600 to-gold-400 transition-all duration-500"
-                style={{ width: `${(knownAr.length / vocab.length) * 100}%` }}
+                style={{ width: `${(app.vocabMastered / Math.max(1, app.vocabTotal)) * 100}%` }}
               />
             </div>
 
-            <div className="[perspective:1400px]">
-              <button
-                onClick={() => setFlipped((f) => !f)}
-                className={`flashcard-inner relative block h-64 w-full cursor-pointer text-left md:h-72 ${flipped ? "flipped" : ""}`}
-                aria-label="Karte umdrehen"
-              >
-                {/* Vorderseite */}
-                <div className="backface absolute inset-0 flex flex-col items-center justify-center rounded-xl border border-gold-500/25 bg-gradient-to-b from-pine-800 to-pine-950/80 p-6">
-                  <p dir="rtl" className="font-quran text-[3.4rem] leading-tight text-gold-300 md:text-6xl">
-                    {card.ar}
-                  </p>
-                  <p className="mt-3 text-sm italic text-ink-dim">{card.tr}</p>
-                  <p className="mt-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-ink-faint">
-                    <Glyph name="reset" className="h-3.5 w-3.5" /> Zum Umdrehen tippen
-                  </p>
-                </div>
-                {/* Rückseite */}
-                <div
-                  className="backface absolute inset-0 flex flex-col items-center justify-center rounded-xl border border-teal-500/30 bg-gradient-to-b from-pine-800 to-pine-950/80 p-6 text-center"
-                  style={{ transform: "rotateY(180deg)" }}
-                >
-                  <p className="font-display text-3xl font-semibold text-ink">{card.de}</p>
-                  <p dir="rtl" className="mt-2 font-kufi text-xl text-teal-400">{card.ar}</p>
-                  <p className="mt-4 max-w-sm border-t border-pine-700 pt-3.5 text-[13px] leading-relaxed text-ink-dim">
-                    {card.extra}
-                  </p>
-                </div>
-              </button>
-            </div>
+            <p className="text-[13.5px] leading-relaxed text-ink-dim">
+              Vokabeln werden jetzt im <strong className="text-ink">zentralen Leitner-Trainer</strong> wiederholt —
+              gemeinsam mit allen anderen Fächern, mit Fälligkeits-Logik, XP und Serie.
+            </p>
 
-            <div className="mt-5 flex items-center justify-center gap-2.5">
-              <button
-                onClick={() => advance(-1)}
-                className="btn-press grid h-10 w-10 place-items-center rounded-full border border-pine-700 text-ink-dim hover:border-gold-500/40 hover:text-gold-300"
-                aria-label="Vorherige Karte"
-              >
-                <Glyph name="arrowL" className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => mark(false)}
-                className="btn-press rounded-full border border-copper-500/45 px-5 py-2.5 text-sm font-bold text-copper-400 hover:bg-copper-500/10"
-              >
-                Nochmal
-              </button>
-              <button
-                onClick={() => mark(true)}
-                className="btn-press rounded-full border border-teal-500/45 bg-teal-500/10 px-5 py-2.5 text-sm font-bold text-teal-400 hover:bg-teal-500/20"
-              >
-                Gewusst ✓
-              </button>
-              <button
-                onClick={() => advance(1)}
-                className="btn-press grid h-10 w-10 place-items-center rounded-full border border-pine-700 text-ink-dim hover:border-gold-500/40 hover:text-gold-300"
-                aria-label="Nächste Karte"
-              >
-                <Glyph name="arrowR" className="h-4 w-4" />
-              </button>
+            <div className="mt-auto flex items-center justify-center pt-6">
+              <span className="btn-press inline-flex items-center gap-2 rounded-full bg-gold-500 px-6 py-3 text-sm font-bold text-pine-950 group-hover:bg-gold-400">
+                <Glyph name="book" className="h-4 w-4" />
+                {app.dueCount > 0 ? `${app.dueCount} Karten wiederholen` : "Zum Trainer"}
+                <Glyph name="arrowR" className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
             </div>
-            <p className="mt-3 text-center text-[12px] text-ink-faint">Karte {idx + 1} von {vocab.length} · {seen} gesehen</p>
-          </div>
+          </Link>
         </Reveal>
 
         {/* Konjugation */}
@@ -291,7 +245,10 @@ export default function ArabicSection() {
                 {(["past", "present"] as const).map((t) => (
                   <button
                     key={t}
-                    onClick={() => setTense(t)}
+                    onClick={() => {
+                      setTense(t);
+                      setVisitedTenses((s) => (s.has(t) ? s : new Set(s).add(t)));
+                    }}
                     className={`btn-press rounded-full px-4 py-1.5 text-[12.5px] font-bold transition-all ${
                       tense === t ? "bg-gold-500 text-pine-950" : "text-ink-dim hover:text-ink"
                     }`}

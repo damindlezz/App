@@ -12,11 +12,16 @@ const MODES: { id: Mode; label: string; icon: GlyphName }[] = [
   { id: "cards", label: "Karteikarten", icon: "book" },
   { id: "quiz", label: "Quiz-Arena", icon: "compass" },
   { id: "drill", label: "Übungen", icon: "qalam" },
-  { id: "stats", label: "Statistik", icon: "flame" },
 ];
 
-export default function TrainingSection() {
-  const [mode, setMode] = useState<Mode>("cards");
+export default function TrainingSection({
+  initialMode = "cards",
+  initialCat,
+}: {
+  initialMode?: Mode;
+  initialCat?: string;
+}) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const app = useApp();
 
   return (
@@ -71,9 +76,8 @@ export default function TrainingSection() {
 
       <div key={mode} className="view-enter pb-20">
         {mode === "cards" && <CardTrainer />}
-        {mode === "quiz" && <QuizArena />}
+        {mode === "quiz" && <QuizArena initialCat={initialCat} />}
         {mode === "drill" && <DrillLab />}
-        {mode === "stats" && <StatsBoard />}
       </div>
     </div>
   );
@@ -100,9 +104,12 @@ function CardTrainer() {
     app.answerCard(cardId, ok);
     setSessionStats((s) => (ok ? { ...s, ok: s.ok + 1 } : { ...s, again: s.again + 1 }));
     setFlipped(false);
-    if (!ok) setQueue((q) => [...q, cardId]);
+    /* P0-Fix: bei „Nochmal“ wächst die Warteschlange —
+       die Längenprüfung muss die aktualisierte Queue verwenden. */
+    const q = ok ? queue : [...queue, cardId];
+    if (!ok) setQueue(q);
     const next = idx + 1;
-    if (next >= queue.length) setSessionDone(true);
+    if (next >= q.length) setSessionDone(true);
     else setIdx(next);
   };
 
@@ -243,9 +250,11 @@ function CardTrainer() {
 /* Quiz-Arena                                                          */
 /* ================================================================== */
 
-function QuizArena() {
+function QuizArena({ initialCat }: { initialCat?: string }) {
   const app = useApp();
-  const [cat, setCat] = useState<CatId | null>(null);
+  const [cat, setCat] = useState<CatId | null>(() =>
+    initialCat && CATS.some((c) => c.id === initialCat) ? (initialCat as CatId) : null,
+  );
   const [runId, setRunId] = useState(0);
 
   if (!cat) {
