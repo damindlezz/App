@@ -11,7 +11,9 @@ export default function SciencesSection() {
 
   /* Lektions-Tracking: geöffnete Wissenschaften + angesehene Reihenfolge */
   const [visited, setVisited] = useState<Set<string>>(() => new Set(["aqida"]));
-  useEffect(() => setVisited((s) => (s.has(sciId) ? s : new Set(s).add(sciId))), [sciId]);
+  useEffect(() => {
+    setVisited((s) => (s.has(sciId) ? s : new Set(s).add(sciId)));
+  }, [sciId]);
   useEffect(() => {
     if (visited.size >= sciences.length) app.completeLesson("wissenschaft", "landkarte");
   }, [visited, app]);

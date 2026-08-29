@@ -84,7 +84,9 @@ function Ambient() {
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo({ top: 0 }), [pathname]);
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [pathname]);
   return null;
 }
 
@@ -110,9 +112,13 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
             <p className="mt-3 rounded-lg border border-pine-700 bg-pine-950/60 px-4 py-3 text-left font-mono text-[12px] leading-relaxed text-copper-400">
               {this.state.error.message}
             </p>
-            <p className="mt-3 text-[13px] text-ink-dim">
-              Details in der Browser-Konsole (F12). Falls du eine alte Projektkopie verwendest: Dev-Server mit
-              STRG+C beenden, Projekt neu entpacken und <code className="text-gold-300">dev.bat</code> erneut starten.
+            <p className="mt-3 text-[13px] leading-relaxed text-ink-dim">
+              Details in der Browser-Konsole (F12). <strong className="text-ink">Häufige Ursache:</strong> eine
+              veraltete Projektkopie mit gemischten alten/neuen Dateien. Abhilfe: Dev-Server mit STRG+C beenden,
+              den Ordner <code className="text-gold-300">node_modules/.vite</code> löschen, sicherstellen, dass die
+              Dateien <code className="text-gold-300">Dashboard.tsx</code> und <code className="text-gold-300">TopBar.tsx</code>{" "}
+              in <code className="text-gold-300">src/components</code> <em>nicht</em> existieren, dann{" "}
+              <code className="text-gold-300">dev.bat</code> erneut starten.
             </p>
             <button
               onClick={() => window.location.reload()}

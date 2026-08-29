@@ -35,7 +35,9 @@ export default function MushafView({ initialSurah = 1 }: { initialSurah?: number
   const [pageN, setPageN] = useState(604);
   const [anchor, setAnchor] = useState<number | null>(null);
 
-  useEffect(() => setSurahN(initialSurah), [initialSurah]);
+  useEffect(() => {
+    setSurahN(initialSurah);
+  }, [initialSurah]);
 
   return (
     <div>

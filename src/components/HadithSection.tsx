@@ -11,7 +11,9 @@ export default function HadithSection() {
 
   /* Lektions-Tracking: gelesene Ḥadīṯe, Isnad & Skalen (beim Ansehen) */
   const [read, setRead] = useState<Set<number>>(() => new Set([0]));
-  useEffect(() => setRead((s) => (s.has(hIdx) ? s : new Set(s).add(hIdx))), [hIdx]);
+  useEffect(() => {
+    setRead((s) => (s.has(hIdx) ? s : new Set(s).add(hIdx)));
+  }, [hIdx]);
   useEffect(() => {
     if (read.size >= hadiths.length) app.completeLesson("hadith", "lesen");
   }, [read, app]);

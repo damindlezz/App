@@ -15,7 +15,9 @@ export default function FiqhSection() {
   const [visitedIssues, setVisitedIssues] = useState<Set<number>>(() => new Set([0]));
   const [visitedSrcs, setVisitedSrcs] = useState<Set<number>>(() => new Set([0]));
   const [visitedMethods, setVisitedMethods] = useState<Set<number>>(() => new Set([0]));
-  useEffect(() => setVisitedIssues((s) => (s.has(issueIdx) ? s : new Set(s).add(issueIdx))), [issueIdx]);
+  useEffect(() => {
+    setVisitedIssues((s) => (s.has(issueIdx) ? s : new Set(s).add(issueIdx)));
+  }, [issueIdx]);
   useEffect(() => setVisitedSrcs((s) => (s.has(srcIdx) ? s : new Set(s).add(srcIdx))), [srcIdx]);
   useEffect(() => setVisitedMethods((s) => (s.has(methodIdx) ? s : new Set(s).add(methodIdx))), [methodIdx]);
   useEffect(() => {

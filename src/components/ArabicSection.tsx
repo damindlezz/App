@@ -15,8 +15,12 @@ export default function ArabicSection() {
   const [visitedLetters, setVisitedLetters] = useState<Set<number>>(() => new Set([0]));
   const [visitedRoots, setVisitedRoots] = useState<Set<number>>(() => new Set([0]));
   const [visitedTenses, setVisitedTenses] = useState<Set<string>>(() => new Set(["past"]));
-  useEffect(() => setVisitedLetters((s) => (s.has(letterIdx) ? s : new Set(s).add(letterIdx))), [letterIdx]);
-  useEffect(() => setVisitedRoots((s) => (s.has(rootIdx) ? s : new Set(s).add(rootIdx))), [rootIdx]);
+  useEffect(() => {
+    setVisitedLetters((s) => (s.has(letterIdx) ? s : new Set(s).add(letterIdx)));
+  }, [letterIdx]);
+  useEffect(() => {
+    setVisitedRoots((s) => (s.has(rootIdx) ? s : new Set(s).add(rootIdx)));
+  }, [rootIdx]);
   useEffect(() => {
     if (visitedLetters.size >= 10) app.completeLesson("arabisch", "alphabet");
   }, [visitedLetters, app]);

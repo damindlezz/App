@@ -114,7 +114,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => setLearnOpen(false), [location.pathname]);
+  useEffect(() => {
+    setLearnOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="relative min-h-screen">
@@ -218,6 +220,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <p className="flex items-center gap-2.5 text-[12px] text-ink-faint">
             <Glyph name="star8" className="h-4 w-4 text-gold-500/60" />
             Nūr · Lernbegleiter — ersetzt keinen Gelehrten, keine Iǧāza, keine Fetwa.
+            <span className="rounded-full border border-pine-700 px-2 py-0.5 text-[10px] font-bold text-ink-faint">v2.0</span>
           </p>
           <p dir="rtl" className="font-kufi text-sm text-gold-500/70">{hijriLabel()}</p>
         </div>
