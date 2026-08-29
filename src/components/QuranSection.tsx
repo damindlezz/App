@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { fatiha, ikhlasDe, ikhlasWords, tajweedQuiz, tajweedRules } from "../data/content";
+import MushafView from "./MushafView";
 import { AyahMarker, CornerOrn, Glyph, Reveal, SectionHead, usePersistentState } from "./ui";
 
 export default function QuranSection() {
@@ -18,11 +19,34 @@ export default function QuranSection() {
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">
       <SectionHead
-        kicker="Muṣḥaf & Regelkunde"
-        title="Die Eröffnung lesen — und verstehen"
-        ar="الفَاتِحَة"
-        desc="Sūrat al-Fātiḥa, Wort für Wort übersetzt. Fahre über ein arabisches Wort, um seine Bedeutung zu sehen — farbig markierte Wörter tragen eine Taǧwīd-Regel."
+        kicker="Muṣḥaf · Taǧwīd · Tafsīr"
+        title="Der Quran — lesen, hören, verstehen"
+        ar="القُرْآن"
+        desc="Blättere wie im Muṣḥaf: nach Sūra, Ǧuzʾ oder Seite — Verse untereinander mit deutscher Übersetzung, Rezitation zum Anhören, Lesezeichen und aufklappbarem Tafsīr."
       />
+
+      {/* ---------- Muṣḥaf-Browser ---------- */}
+      <Reveal>
+        <MushafView />
+      </Reveal>
+
+      {/* ---------- Wort-für-Wort: Fātiḥa ---------- */}
+      <section className="pt-16">
+        <Reveal>
+          <div className="mb-8">
+            <p className="mb-3 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.28em] text-gold-500">
+              <span className="inline-block h-px w-8 bg-gold-500/70" />
+              Wort für Wort · Detailstudie
+            </p>
+            <h3 className="font-display text-3xl font-semibold text-ink md:text-4xl">
+              Die Fātiḥa — Wort für Wort
+            </h3>
+            <p className="mt-3 max-w-2xl text-[14.5px] text-ink-dim">
+              Fahre über ein arabisches Wort, um seine Bedeutung zu sehen — farbig markierte Wörter tragen
+              eine Taǧwīd-Regel.
+            </p>
+          </div>
+        </Reveal>
 
       {/* ---------- Muṣḥaf-Lesepanel ---------- */}
       <Reveal>
@@ -76,6 +100,7 @@ export default function QuranSection() {
           </div>
         </div>
       </Reveal>
+      </section>
 
       {/* ---------- Taǧwīd-Werkstatt ---------- */}
       <section className="pt-16">
