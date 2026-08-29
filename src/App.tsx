@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { AppProvider } from "./backend/store";
 import ArabicSection from "./components/ArabicSection";
 import Dashboard from "./components/Dashboard";
 import FiqhSection from "./components/FiqhSection";
 import HadithSection from "./components/HadithSection";
 import QuranSection from "./components/QuranSection";
 import SciencesSection from "./components/SciencesSection";
+import TrainingSection from "./components/TrainingSection";
 import TopBar, { TABS } from "./components/TopBar";
 import type { TabId } from "./components/TopBar";
 import { Glyph, usePersistentState } from "./components/ui";
@@ -167,20 +169,23 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <Ambient />
-      <div className="relative z-10">
-        <TopBar tab={tab} setTab={setTab} theme={theme} setTheme={setTheme} />
-        <main key={tab} className="view-enter">
-          {tab === "start" && <Dashboard setTab={setTab} />}
-          {tab === "quran" && <QuranSection />}
-          {tab === "arabic" && <ArabicSection />}
-          {tab === "fiqh" && <FiqhSection />}
-          {tab === "hadith" && <HadithSection />}
-          {tab === "science" && <SciencesSection />}
-        </main>
-        <Footer setTab={setTab} />
+    <AppProvider>
+      <div className="relative min-h-screen">
+        <Ambient />
+        <div className="relative z-10">
+          <TopBar tab={tab} setTab={setTab} theme={theme} setTheme={setTheme} />
+          <main key={tab} className="view-enter">
+            {tab === "start" && <Dashboard setTab={setTab} />}
+            {tab === "quran" && <QuranSection />}
+            {tab === "arabic" && <ArabicSection />}
+            {tab === "fiqh" && <FiqhSection />}
+            {tab === "hadith" && <HadithSection />}
+            {tab === "science" && <SciencesSection />}
+            {tab === "training" && <TrainingSection />}
+          </main>
+          <Footer setTab={setTab} />
+        </div>
       </div>
-    </div>
+    </AppProvider>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useApp } from "../backend/store";
 import {
   ayahOfDay,
   dhikrPresets,
@@ -198,6 +199,7 @@ function Tasbih() {
 }
 
 export default function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
+  const { stats, dueCount, mastered } = useApp();
   const [plan, setPlan] = usePersistentState<boolean[]>("nur-tagesplan", planItems.map((p) => p.done));
   const doneCount = plan.filter(Boolean).length;
   const pct = Math.round((doneCount / plan.length) * 100);
@@ -268,24 +270,24 @@ export default function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
             </div>
           </Reveal>
 
-          {/* Zahlenband */}
+          {/* Zahlenband — live aus dem Backend */}
           <Reveal delay={650}>
             <div className="mt-12 grid grid-cols-2 gap-y-6 border-t border-gold-500/12 pt-7 sm:grid-cols-4">
               <div>
-                <p className="font-display text-4xl font-semibold text-gold-400">12</p>
+                <p className="font-display text-4xl font-semibold text-gold-400">{stats.streak}</p>
                 <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">Tage Serie</p>
               </div>
               <div>
-                <p className="font-display text-4xl font-semibold text-teal-400">14</p>
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">Sūren im Ḥifẓ</p>
+                <p className="font-display text-4xl font-semibold text-teal-400">{stats.xp}</p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">Erfahrung (XP)</p>
               </div>
               <div>
-                <p className="font-display text-4xl font-semibold text-lapis-400">312</p>
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">Vokabeln sicher</p>
+                <p className="font-display text-4xl font-semibold text-lapis-400">{mastered}</p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">Karten gemeistert</p>
               </div>
               <div>
-                <p className="font-display text-4xl font-semibold text-plum-400">4,2h</p>
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">diese Woche</p>
+                <p className="font-display text-4xl font-semibold text-plum-400">{stats.reviewsToday}</p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-dim">heute wiederholt</p>
               </div>
             </div>
           </Reveal>
@@ -430,6 +432,29 @@ export default function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
                 <h3 className="mt-1 font-display text-2xl font-semibold text-ink">Wo du gerade stehst</h3>
               </div>
               <ul className="space-y-2.5">
+                {/* Trainings-Kachel mit Live-Zählern */}
+                <li>
+                  <Reveal>
+                    <button
+                      onClick={() => setTab("training")}
+                      className="card-hover group flex w-full items-center gap-4 rounded-lg border border-gold-500/45 bg-gold-500/[0.08] px-4 py-3.5 text-left"
+                    >
+                      <span className="grid h-11 w-11 flex-none place-items-center rounded-lg bg-gold-500/15 text-gold-400">
+                        <Glyph name="flame" className="h-5.5 w-5.5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline justify-between gap-3">
+                          <span className="font-display text-[17px] font-semibold text-gold-300">Training & Wiederholung</span>
+                          <span className="font-display text-lg font-semibold text-gold-400">{dueCount}</span>
+                        </span>
+                        <span className="mt-0.5 block truncate text-[12.5px] text-ink-dim">
+                          {dueCount > 0 ? `${dueCount} Karten heute fällig · ${mastered} gemeistert` : "Keine Karten fällig — Quiz & Übungen warten"}
+                        </span>
+                      </span>
+                      <Glyph name="arrowR" className="h-4 w-4 flex-none text-ink-faint transition-all group-hover:translate-x-1 group-hover:text-gold-400" />
+                    </button>
+                  </Reveal>
+                </li>
                 {tracks.map((t, i) => (
                   <li key={t.id}>
                     <Reveal delay={i * 90}>

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { THEMES } from "../themes";
 import type { ThemeId } from "../themes";
+import { useApp } from "../backend/store";
 import { Glyph } from "./ui";
 
-export type TabId = "start" | "quran" | "arabic" | "fiqh" | "hadith" | "science";
+export type TabId = "start" | "quran" | "arabic" | "fiqh" | "hadith" | "science" | "training";
 
 export const TABS: { id: TabId; label: string }[] = [
   { id: "start", label: "Start" },
@@ -12,6 +13,7 @@ export const TABS: { id: TabId; label: string }[] = [
   { id: "fiqh", label: "Fiqh & Uṣūl" },
   { id: "hadith", label: "Ḥadīṯ" },
   { id: "science", label: "Wissenschaften" },
+  { id: "training", label: "Training" },
 ];
 
 /* ---------- Farbwahl ---------- */
@@ -117,6 +119,8 @@ export default function TopBar({
   theme: ThemeId;
   setTheme: (t: ThemeId) => void;
 }) {
+  const { stats, dueCount } = useApp();
+
   return (
     <header className="sticky top-0 z-40 border-b border-gold-500/10 bg-pine-950/85 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
@@ -151,10 +155,23 @@ export default function TopBar({
                 <Glyph name="flame" className="h-4 w-4" />
               </span>
               <span className="leading-tight">
-                <span className="block text-sm font-bold text-ink">12 Tage</span>
+                <span className="block text-sm font-bold text-ink">
+                  {stats.streak} {stats.streak === 1 ? "Tag" : "Tage"}
+                </span>
                 <span className="block text-[10px] uppercase tracking-[0.18em] text-ink-dim">Lernserie</span>
               </span>
             </div>
+            {dueCount > 0 && (
+              <div className="hidden items-center gap-2 rounded-full border border-teal-500/25 bg-pine-800/80 py-1.5 pl-2 pr-3 md:flex">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-teal-500/15 text-teal-400">
+                  <Glyph name="book" className="h-4 w-4" />
+                </span>
+                <span className="leading-tight">
+                  <span className="block text-sm font-bold text-ink">{dueCount} fällig</span>
+                  <span className="block text-[10px] uppercase tracking-[0.18em] text-ink-dim">Karten</span>
+                </span>
+              </div>
+            )}
             <div className="hidden text-right leading-tight xl:block">
               <p className="font-kufi text-sm text-gold-400">٢٥ شعبان ١٤٤٧</p>
               <p className="text-[11px] text-ink-dim">25. Šaʿbān 1447 · Freitag</p>
